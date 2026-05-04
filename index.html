@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Critics vs Crowds — 30 Years of Movies & Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root {
+  --orange: #FF6B2B;
+  --orange-dim: rgba(255,107,43,0.18);
+  --orange-glow: rgba(255,107,43,0.35);
+  --bg: #0c0c0d;
+  --bg2: #111113;
+  --bg3: #181819;
+  --border: rgba(255,255,255,0.07);
+  --border-orange: rgba(255,107,43,0.3);
+  --text: #e8e6e1;
+  --text-dim: rgba(232,230,225,0.45);
+  --text-faint: rgba(232,230,225,0.2);
+  --mono: 'Space Mono', monospace;
+  --sans: 'Space Grotesk', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: .6;
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+header { margin-bottom: 40px; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--orange);
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+.eyebrow::before {
+  content: '';
+  display: inline-block; width: 28px; height: 1px;
+  background: var(--orange);
+}
+
+h1 {
+  font-family: var(--mono);
+  font-size: clamp(24px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -.01em;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+h1 span { color: var(--orange); }
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 560px;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+/* ── METRICS ROW ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+@media(max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
+
+.metric {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .2s;
+}
+.metric::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--orange-dim) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .3s;
+}
+.metric:hover::after { opacity: 1; }
+.metric:hover { border-color: var(--border-orange); }
+
+.m-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.m-val {
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--orange);
+  line-height: 1;
+  margin-bottom: 3px;
+}
+.m-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+/* ── CONTROLS ── */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.ctl-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+.btn {
+  padding: 5px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: .08em;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: all .15s;
+  text-transform: uppercase;
+}
+.btn:hover { border-color: var(--orange); color: var(--orange); }
+.btn.on { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 16px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+.li { display: flex; align-items: center; gap: 7px; }
+.lc { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.ld { width: 10px; height: 10px; transform: rotate(45deg); flex-shrink: 0; }
+
+/* ── MAIN CANVAS AREA ── */
+.chart-area {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 16px 12px;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.chart-area .section-tag {
+  position: absolute;
+  top: 14px; right: 16px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-faint);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+#mainCanvas {
+  display: block;
+  width: 100%;
+  cursor: crosshair;
+}
+
+/* ── TOOLTIP ── */
+#tooltip {
+  position: fixed;
+  background: rgba(10,10,11,0.97);
+  border: 1px solid var(--border-orange);
+  border-radius: 3px;
+  padding: 13px 16px;
+  font-family: var(--sans);
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s;
+  z-index: 100;
+  max-width: 220px;
+  min-width: 180px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,107,43,0.1);
+}
+
+.tt-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 5px;
+  line-height: 1.3;
+}
+.tt-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  margin-bottom: 9px;
+}
+.tt-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0;
+}
+.tt-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 3px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.tt-row .val { color: #fff; font-weight: 500; font-family: var(--mono); }
+.tt-role {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--orange);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+/* ── GAP CHART ── */
+.gap-area {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 20px 16px 16px;
+}
+.gap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.gap-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--orange);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.gap-legend {
+  display: flex;
+  gap: 14px;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+}
+.gap-legend .dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 1px;
+  margin-right: 5px;
+}
+.gap-scroll { overflow-x: auto; padding-bottom: 4px; }
+#gapCanvas { display: block; }
+
+/* ── INSIGHT STRIP ── */
+.insight-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 24px;
+}
+@media(max-width: 640px) { .insight-strip { grid-template-columns: 1fr; } }
+.insight {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 14px 16px;
+  border-left: 3px solid var(--orange);
+}
+.insight-year {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--orange);
+  margin-bottom: 4px;
+}
+.insight-text {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* Scan line animation for the main chart */
+@keyframes scanPulse {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Fade in */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.wrap > * { animation: fadeUp .6s ease both; }
+header       { animation-delay: .05s; }
+.metrics     { animation-delay: .15s; }
+.controls    { animation-delay: .22s; }
+.legend      { animation-delay: .27s; }
+.chart-area  { animation-delay: .32s; }
+.gap-area    { animation-delay: .40s; }
+.insight-strip { animation-delay: .48s; }
+</style>
+</head>
+<body>
+
+<div id="tooltip">
+  <div class="tt-name" id="tt-name"></div>
+  <div class="tt-tag" id="tt-tag"></div>
+  <div class="tt-row"><span>Gross</span><span class="val" id="tt-gross"></span></div>
+  <div class="tt-row"><span>Score</span><span class="val" id="tt-score"></span></div>
+  <div class="tt-row"><span>Genre</span><span class="val" id="tt-genre"></span></div>
+  <div class="tt-divider"></div>
+  <div class="tt-role" id="tt-role"></div>
+</div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Data Visualization &nbsp;·&nbsp; 1994–2024</div>
+    <h1>Critics vs <span>Crowds</span></h1>
+    <p class="subtitle">30 years of movies &amp; games — comparing what critics celebrated against what audiences actually paid to see. Oscar Winners vs Box Office. GOTY vs Top Grossing Games. The gap tells the story.</p>
+  </header>
+
+  <div class="metrics" id="metrics"></div>
+
+  <div class="controls" id="btns">
+    <span class="ctl-label">Filter —</span>
+    <button class="btn on" data-f="all">All</button>
+    <button class="btn" data-f="movie">Movies</button>
+    <button class="btn" data-f="game">Games</button>
+    <button class="btn" data-f="1990s">90s</button>
+    <button class="btn" data-f="2000s">2000s</button>
+    <button class="btn" data-f="2010s">2010s</button>
+    <button class="btn" data-f="2020s">2020s</button>
+  </div>
+
+  <div class="legend">
+    <div class="li">
+      <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#FF6B2B"/></svg>
+      <span>Critic's choice (Oscar / GOTY) — Movie</span>
+    </div>
+    <div class="li">
+      <svg width="14" height="14"><polygon points="7,1 13,7 7,13 1,7" fill="#FF6B2B"/></svg>
+      <span>Critic's choice — Game</span>
+    </div>
+    <div class="li">
+      <svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg>
+      <span>Top Grosser — Movie</span>
+    </div>
+    <div class="li">
+      <svg width="14" height="14"><polygon points="7,1 13,7 7,13 1,7" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg>
+      <span>Top Grosser — Game</span>
+    </div>
+    <div class="li" style="color: rgba(255,255,255,0.25)">
+      <svg width="14" height="14"><circle cx="7" cy="7" r="4" fill="rgba(255,255,255,0.15)"/></svg>
+      <span>Size = Critic Score</span>
+    </div>
+  </div>
+
+  <div class="chart-area">
+    <span class="section-tag">Y-axis: Box Office / Sales ($M) &nbsp;·&nbsp; X-axis: Year</span>
+    <canvas id="mainCanvas"></canvas>
+  </div>
+
+  <div class="gap-area">
+    <div class="gap-header">
+      <div class="gap-title">Earnings Gap — Critic Pick vs Top Grosser ($M)</div>
+      <div class="gap-legend">
+        <span><span class="dot" style="background:#FF6B2B;"></span>Movie gap</span>
+        <span><span class="dot" style="background:rgba(255,255,255,0.35);"></span>Game gap</span>
+      </div>
+    </div>
+    <div class="gap-scroll"><canvas id="gapCanvas"></canvas></div>
+  </div>
+
+  <div class="insight-strip">
+    <div class="insight">
+      <div class="insight-year">2009</div>
+      <div class="insight-text">Biggest movie divergence ever. The Hurt Locker ($49M) won Best Picture over Avatar ($2.9B). A $2,874M gap.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-year">2012</div>
+      <div class="insight-text">Games went artsy. Journey (a 2-hour meditation game) beat Call of Duty: Black Ops 2 ($1B) for GOTY.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-year">2018</div>
+      <div class="insight-text">A rare consensus year. Red Dead Redemption 2 was both GOTY and the top-selling game. Critics = Crowds.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const DATA = [
+  {yr:1994,type:'movie',role:'critic',title:'Forrest Gump',gross:678,score:82,genre:'Drama'},
+  {yr:1994,type:'movie',role:'top',title:'The Lion King',gross:763,score:88,genre:'Animation'},
+  {yr:1994,type:'game',role:'critic',title:'Final Fantasy VI',gross:40,score:92,genre:'RPG'},
+  {yr:1994,type:'game',role:'top',title:'Donkey Kong Country',gross:150,score:85,genre:'Platformer'},
+  {yr:1995,type:'movie',role:'critic',title:'Braveheart',gross:210,score:68,genre:'War'},
+  {yr:1995,type:'movie',role:'top',title:'Die Hard with a Vengeance',gross:366,score:65,genre:'Action'},
+  {yr:1995,type:'game',role:'critic',title:'Chrono Trigger',gross:45,score:95,genre:'RPG'},
+  {yr:1995,type:'game',role:'top',title:'Mortal Kombat 3',gross:120,score:72,genre:'Action'},
+  {yr:1996,type:'movie',role:'critic',title:'The English Patient',gross:232,score:87,genre:'Drama'},
+  {yr:1996,type:'movie',role:'top',title:'Independence Day',gross:817,score:60,genre:'Sci-Fi'},
+  {yr:1996,type:'game',role:'critic',title:'Super Mario 64',gross:200,score:99,genre:'Platformer'},
+  {yr:1996,type:'game',role:'top',title:'Crash Bandicoot',gross:180,score:79,genre:'Platformer'},
+  {yr:1997,type:'movie',role:'critic',title:'Titanic',gross:2187,score:88,genre:'Drama'},
+  {yr:1997,type:'movie',role:'top',title:'Titanic',gross:2187,score:88,genre:'Drama'},
+  {yr:1997,type:'game',role:'critic',title:'GoldenEye 007',gross:250,score:96,genre:'FPS'},
+  {yr:1997,type:'game',role:'top',title:'Final Fantasy VII',gross:330,score:92,genre:'RPG'},
+  {yr:1998,type:'movie',role:'critic',title:"Shakespeare in Love",gross:289,score:87,genre:'Drama'},
+  {yr:1998,type:'movie',role:'top',title:'Saving Private Ryan',gross:482,score:91,genre:'War'},
+  {yr:1998,type:'game',role:'critic',title:'Zelda: Ocarina of Time',gross:300,score:99,genre:'Adventure'},
+  {yr:1998,type:'game',role:'top',title:'Pokémon Red/Blue',gross:500,score:87,genre:'RPG'},
+  {yr:1999,type:'movie',role:'critic',title:'American Beauty',gross:356,score:88,genre:'Drama'},
+  {yr:1999,type:'movie',role:'top',title:'The Phantom Menace',gross:1027,score:55,genre:'Sci-Fi'},
+  {yr:1999,type:'game',role:'critic',title:'Planescape: Torment',gross:30,score:91,genre:'RPG'},
+  {yr:1999,type:'game',role:'top',title:'Pokémon Yellow',gross:480,score:84,genre:'RPG'},
+  {yr:2000,type:'movie',role:'critic',title:'Gladiator',gross:460,score:76,genre:'Action'},
+  {yr:2000,type:'movie',role:'top',title:'Mission: Impossible 2',gross:546,score:58,genre:'Action'},
+  {yr:2000,type:'game',role:'critic',title:"Zelda: Majora's Mask",gross:180,score:95,genre:'Adventure'},
+  {yr:2000,type:'game',role:'top',title:'The Sims',gross:400,score:85,genre:'Simulation'},
+  {yr:2001,type:'movie',role:'critic',title:'A Beautiful Mind',gross:313,score:72,genre:'Drama'},
+  {yr:2001,type:'movie',role:'top',title:"Harry Potter: Sorcerer's Stone",gross:975,score:65,genre:'Fantasy'},
+  {yr:2001,type:'game',role:'critic',title:'Halo: Combat Evolved',gross:200,score:97,genre:'FPS'},
+  {yr:2001,type:'game',role:'top',title:'Grand Theft Auto III',gross:350,score:97,genre:'Action'},
+  {yr:2002,type:'movie',role:'critic',title:'Chicago',gross:306,score:87,genre:'Drama'},
+  {yr:2002,type:'movie',role:'top',title:'Spider-Man',gross:822,score:73,genre:'Action'},
+  {yr:2002,type:'game',role:'critic',title:'Metroid Prime',gross:150,score:97,genre:'Adventure'},
+  {yr:2002,type:'game',role:'top',title:'GTA: Vice City',gross:400,score:95,genre:'Action'},
+  {yr:2003,type:'movie',role:'critic',title:'Return of the King',gross:1120,score:94,genre:'Fantasy'},
+  {yr:2003,type:'movie',role:'top',title:'Return of the King',gross:1120,score:94,genre:'Fantasy'},
+  {yr:2003,type:'game',role:'critic',title:'KOTOR',gross:200,score:94,genre:'RPG'},
+  {yr:2003,type:'game',role:'top',title:'Pokémon Ruby/Sapphire',gross:520,score:82,genre:'RPG'},
+  {yr:2004,type:'movie',role:'critic',title:'Million Dollar Baby',gross:216,score:86,genre:'Drama'},
+  {yr:2004,type:'movie',role:'top',title:'Shrek 2',gross:920,score:89,genre:'Animation'},
+  {yr:2004,type:'game',role:'critic',title:'Half-Life 2',gross:300,score:96,genre:'FPS'},
+  {yr:2004,type:'game',role:'top',title:'Halo 2',gross:500,score:95,genre:'FPS'},
+  {yr:2005,type:'movie',role:'critic',title:'Crash',gross:98,score:75,genre:'Drama'},
+  {yr:2005,type:'movie',role:'top',title:'Star Wars: Revenge of the Sith',gross:848,score:80,genre:'Sci-Fi'},
+  {yr:2005,type:'game',role:'critic',title:'Resident Evil 4',gross:300,score:96,genre:'Horror'},
+  {yr:2005,type:'game',role:'top',title:'Pokémon Emerald',gross:460,score:76,genre:'RPG'},
+  {yr:2006,type:'movie',role:'critic',title:'The Departed',gross:290,score:85,genre:'Crime'},
+  {yr:2006,type:'movie',role:'top',title:'Pirates of the Caribbean 2',gross:1066,score:53,genre:'Adventure'},
+  {yr:2006,type:'game',role:'critic',title:'Zelda: Twilight Princess',gross:350,score:96,genre:'Adventure'},
+  {yr:2006,type:'game',role:'top',title:'Wii Sports',gross:600,score:76,genre:'Sports'},
+  {yr:2007,type:'movie',role:'critic',title:'No Country for Old Men',gross:172,score:91,genre:'Thriller'},
+  {yr:2007,type:'movie',role:'top',title:'Pirates of the Caribbean 3',gross:963,score:54,genre:'Adventure'},
+  {yr:2007,type:'game',role:'critic',title:'BioShock',gross:400,score:96,genre:'FPS'},
+  {yr:2007,type:'game',role:'top',title:'Halo 3',gross:600,score:94,genre:'FPS'},
+  {yr:2008,type:'movie',role:'critic',title:'Slumdog Millionaire',gross:377,score:81,genre:'Drama'},
+  {yr:2008,type:'movie',role:'top',title:'The Dark Knight',gross:1004,score:84,genre:'Action'},
+  {yr:2008,type:'game',role:'critic',title:'Metal Gear Solid 4',gross:320,score:94,genre:'Action'},
+  {yr:2008,type:'game',role:'top',title:'GTA IV',gross:620,score:98,genre:'Action'},
+  {yr:2009,type:'movie',role:'critic',title:'The Hurt Locker',gross:49,score:97,genre:'War'},
+  {yr:2009,type:'movie',role:'top',title:'Avatar',gross:2923,score:83,genre:'Sci-Fi'},
+  {yr:2009,type:'game',role:'critic',title:'Uncharted 2',gross:400,score:96,genre:'Adventure'},
+  {yr:2009,type:'game',role:'top',title:'Call of Duty: MW2',gross:1000,score:86,genre:'FPS'},
+  {yr:2010,type:'movie',role:'critic',title:"The King's Speech",gross:414,score:88,genre:'Drama'},
+  {yr:2010,type:'movie',role:'top',title:'Toy Story 3',gross:1067,score:92,genre:'Animation'},
+  {yr:2010,type:'game',role:'critic',title:'Red Dead Redemption',gross:700,score:95,genre:'Open World'},
+  {yr:2010,type:'game',role:'top',title:'CoD: Black Ops',gross:1070,score:88,genre:'FPS'},
+  {yr:2011,type:'movie',role:'critic',title:'The Artist',gross:133,score:89,genre:'Drama'},
+  {yr:2011,type:'movie',role:'top',title:'Harry Potter: Deathly Hallows 2',gross:1342,score:80,genre:'Fantasy'},
+  {yr:2011,type:'game',role:'critic',title:'Skyrim',gross:620,score:96,genre:'RPG'},
+  {yr:2011,type:'game',role:'top',title:'CoD: MW3',gross:1100,score:88,genre:'FPS'},
+  {yr:2012,type:'movie',role:'critic',title:'Argo',gross:232,score:96,genre:'Thriller'},
+  {yr:2012,type:'movie',role:'top',title:'The Avengers',gross:1519,score:92,genre:'Action'},
+  {yr:2012,type:'game',role:'critic',title:'Journey',gross:30,score:92,genre:'Adventure'},
+  {yr:2012,type:'game',role:'top',title:'CoD: Black Ops 2',gross:1000,score:83,genre:'FPS'},
+  {yr:2013,type:'movie',role:'critic',title:'12 Years a Slave',gross:187,score:96,genre:'Drama'},
+  {yr:2013,type:'movie',role:'top',title:'Iron Man 3',gross:1215,score:79,genre:'Action'},
+  {yr:2013,type:'game',role:'critic',title:'The Last of Us',gross:500,score:95,genre:'Survival'},
+  {yr:2013,type:'game',role:'top',title:'GTA V',gross:2000,score:97,genre:'Open World'},
+  {yr:2014,type:'movie',role:'critic',title:'Birdman',gross:103,score:91,genre:'Drama'},
+  {yr:2014,type:'movie',role:'top',title:'Transformers: Age of Extinction',gross:1104,score:18,genre:'Action'},
+  {yr:2014,type:'game',role:'critic',title:'Dragon Age: Inquisition',gross:400,score:89,genre:'RPG'},
+  {yr:2014,type:'game',role:'top',title:'CoD: Advanced Warfare',gross:850,score:83,genre:'FPS'},
+  {yr:2015,type:'movie',role:'critic',title:'Spotlight',gross:98,score:97,genre:'Drama'},
+  {yr:2015,type:'movie',role:'top',title:'Star Wars: The Force Awakens',gross:2068,score:93,genre:'Sci-Fi'},
+  {yr:2015,type:'game',role:'critic',title:'The Witcher 3',gross:700,score:93,genre:'RPG'},
+  {yr:2015,type:'game',role:'top',title:'CoD: Black Ops 3',gross:800,score:81,genre:'FPS'},
+  {yr:2016,type:'movie',role:'critic',title:'Moonlight',gross:65,score:98,genre:'Drama'},
+  {yr:2016,type:'movie',role:'top',title:'Captain America: Civil War',gross:1153,score:91,genre:'Action'},
+  {yr:2016,type:'game',role:'critic',title:'Overwatch',gross:600,score:91,genre:'FPS'},
+  {yr:2016,type:'game',role:'top',title:'CoD: Infinite Warfare',gross:750,score:74,genre:'FPS'},
+  {yr:2017,type:'movie',role:'critic',title:'The Shape of Water',gross:195,score:92,genre:'Fantasy'},
+  {yr:2017,type:'movie',role:'top',title:'The Fate of the Furious',gross:1236,score:67,genre:'Action'},
+  {yr:2017,type:'game',role:'critic',title:'Zelda: Breath of the Wild',gross:800,score:97,genre:'Open World'},
+  {yr:2017,type:'game',role:'top',title:'CoD: WWII',gross:800,score:80,genre:'FPS'},
+  {yr:2018,type:'movie',role:'critic',title:'Green Book',gross:321,score:69,genre:'Drama'},
+  {yr:2018,type:'movie',role:'top',title:'Avengers: Infinity War',gross:2048,score:91,genre:'Action'},
+  {yr:2018,type:'game',role:'critic',title:'Red Dead Redemption 2',gross:1000,score:97,genre:'Open World'},
+  {yr:2018,type:'game',role:'top',title:'Red Dead Redemption 2',gross:1000,score:97,genre:'Open World'},
+  {yr:2019,type:'movie',role:'critic',title:'Parasite',gross:263,score:96,genre:'Thriller'},
+  {yr:2019,type:'movie',role:'top',title:'Avengers: Endgame',gross:2797,score:94,genre:'Action'},
+  {yr:2019,type:'game',role:'critic',title:'Sekiro',gross:500,score:90,genre:'Action-RPG'},
+  {yr:2019,type:'game',role:'top',title:'CoD: Modern Warfare',gross:1000,score:81,genre:'FPS'},
+  {yr:2020,type:'movie',role:'critic',title:'Nomadland',gross:39,score:93,genre:'Drama'},
+  {yr:2020,type:'movie',role:'top',title:'Bad Boys for Life',gross:206,score:76,genre:'Action'},
+  {yr:2020,type:'game',role:'critic',title:'The Last of Us Part II',gross:400,score:93,genre:'Survival'},
+  {yr:2020,type:'game',role:'top',title:'Animal Crossing: New Horizons',gross:600,score:90,genre:'Simulation'},
+  {yr:2021,type:'movie',role:'critic',title:'CODA',gross:2,score:72,genre:'Drama'},
+  {yr:2021,type:'movie',role:'top',title:'Spider-Man: No Way Home',gross:1901,score:93,genre:'Action'},
+  {yr:2021,type:'game',role:'critic',title:'Forza Horizon 5',gross:800,score:92,genre:'Sports'},
+  {yr:2021,type:'game',role:'top',title:'CoD: Vanguard',gross:600,score:75,genre:'FPS'},
+  {yr:2022,type:'movie',role:'critic',title:'Everything Everywhere All at Once',gross:70,score:95,genre:'Sci-Fi'},
+  {yr:2022,type:'movie',role:'top',title:'Top Gun: Maverick',gross:1493,score:96,genre:'Action'},
+  {yr:2022,type:'game',role:'critic',title:'Elden Ring',gross:1000,score:96,genre:'Action-RPG'},
+  {yr:2022,type:'game',role:'top',title:'CoD: Modern Warfare II',gross:1000,score:74,genre:'FPS'},
+  {yr:2023,type:'movie',role:'critic',title:'Oppenheimer',gross:952,score:88,genre:'Drama'},
+  {yr:2023,type:'movie',role:'top',title:'Barbie',gross:1441,score:88,genre:'Comedy'},
+  {yr:2023,type:'game',role:'critic',title:"Baldur's Gate 3",gross:700,score:97,genre:'RPG'},
+  {yr:2023,type:'game',role:'top',title:'Hogwarts Legacy',gross:1000,score:84,genre:'RPG'},
+  {yr:2024,type:'movie',role:'critic',title:'Anora',gross:55,score:95,genre:'Drama'},
+  {yr:2024,type:'movie',role:'top',title:'Inside Out 2',gross:1698,score:91,genre:'Animation'},
+  {yr:2024,type:'game',role:'critic',title:'Astro Bot',gross:300,score:94,genre:'Platformer'},
+  {yr:2024,type:'game',role:'top',title:'Black Myth: Wukong',gross:1000,score:82,genre:'Action-RPG'},
+];
+
+const GENRE_COLORS = {
+  Drama:'#FF6B2B', Action:'#e05520', Animation:'#f0a040', Fantasy:'#cc4488',
+  'Sci-Fi':'#3a8fff', War:'#888', Crime:'#aaa88a', Thriller:'#cc9922',
+  RPG:'#00c896', FPS:'#ff3355', Horror:'#cc2222', Adventure:'#33aacc',
+  'Action-RPG':'#aa77ff', Sports:'#88dd33', Platformer:'#ffbb22',
+  'Open World':'#22ccaa', Survival:'#ee5533', Simulation:'#55aaff', Comedy:'#ffdd44'
+};
+
+const MIN_YR = 1994, MAX_YR = 2024;
+const PAD = { t: 30, r: 20, b: 50, l: 72 };
+
+let activeFilter = 'all';
+let animProg = 0, animFrame;
+let drawnPts = [];
+let hoveredPt = null;
+
+const mainCanvas = document.getElementById('mainCanvas');
+const mCtx = mainCanvas.getContext('2d');
+
+function getFiltered() {
+  return DATA.filter(d => {
+    if (activeFilter === 'movie') return d.type === 'movie';
+    if (activeFilter === 'game') return d.type === 'game';
+    if (activeFilter === '1990s') return d.yr <= 1999;
+    if (activeFilter === '2000s') return d.yr >= 2000 && d.yr <= 2009;
+    if (activeFilter === '2010s') return d.yr >= 2010 && d.yr <= 2019;
+    if (activeFilter === '2020s') return d.yr >= 2020;
+    return true;
+  });
+}
+
+function setCanvasSize() {
+  const w = mainCanvas.parentElement.clientWidth - 32;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = Math.max(w, 320);
+  const cssH = Math.round(cssW * 0.58);
+  mainCanvas.style.width = cssW + 'px';
+  mainCanvas.style.height = cssH + 'px';
+  mainCanvas.width = cssW * dpr;
+  mainCanvas.height = cssH * dpr;
+  mCtx.scale(dpr, dpr);
+  return { W: cssW, H: cssH };
+}
+
+function xF(yr, W) {
+  return PAD.l + (yr - MIN_YR) / (MAX_YR - MIN_YR) * (W - PAD.l - PAD.r);
+}
+function yF(g, maxG, H) {
+  return PAD.t + (1 - g / maxG) * (H - PAD.t - PAD.b);
+}
+function scoreToR(s) {
+  return 5 + ((s - 60) / 40) * 12;
+}
+
+const DECADES = [
+  { s: 1994, e: 1999, label: '90s' },
+  { s: 2000, e: 2009, label: '2000s' },
+  { s: 2010, e: 2019, label: '2010s' },
+  { s: 2020, e: 2024, label: '2020s' },
+];
+
+function draw(prog) {
+  const { W, H } = { W: parseInt(mainCanvas.style.width), H: parseInt(mainCanvas.style.height) };
+  mCtx.clearRect(0, 0, W, H);
+
+  const fd = getFiltered();
+  const maxG = Math.max(...fd.map(d => d.gross)) * 1.13;
+
+  // Decade bands
+  DECADES.forEach((d, i) => {
+    const x1 = xF(d.s, W);
+    const x2 = xF(Math.min(d.e, MAX_YR) + 0.9, W);
+    mCtx.fillStyle = i % 2 === 0 ? 'rgba(255,107,43,0.03)' : 'rgba(255,255,255,0.018)';
+    mCtx.fillRect(x1, PAD.t, x2 - x1, H - PAD.t - PAD.b);
+    mCtx.fillStyle = 'rgba(255,107,43,0.3)';
+    mCtx.font = '9px Space Mono, monospace';
+    mCtx.textAlign = 'center';
+    mCtx.fillText(d.label, (x1 + x2) / 2, PAD.t - 10);
+  });
+
+  // Grid lines Y
+  const gridVals = [0, 500, 1000, 1500, 2000, 2500, 3000];
+  gridVals.forEach(v => {
+    if (v > maxG) return;
+    const y = yF(v, maxG, H);
+    mCtx.strokeStyle = 'rgba(255,255,255,0.05)';
+    mCtx.lineWidth = 0.5;
+    mCtx.beginPath(); mCtx.moveTo(PAD.l, y); mCtx.lineTo(W - PAD.r, y); mCtx.stroke();
+    mCtx.fillStyle = 'rgba(255,255,255,0.22)';
+    mCtx.font = '9px Space Mono, monospace';
+    mCtx.textAlign = 'right';
+    mCtx.fillText('$' + v + 'M', PAD.l - 6, y + 3.5);
+  });
+
+  // Grid lines X + labels
+  const xYears = [1994, 1997, 2000, 2003, 2006, 2009, 2012, 2015, 2018, 2021, 2024];
+  xYears.forEach(yr => {
+    const x = xF(yr, W);
+    mCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+    mCtx.lineWidth = 0.5;
+    mCtx.beginPath(); mCtx.moveTo(x, PAD.t); mCtx.lineTo(x, H - PAD.b); mCtx.stroke();
+    mCtx.fillStyle = 'rgba(255,255,255,0.28)';
+    mCtx.font = '9px Space Mono, monospace';
+    mCtx.textAlign = 'center';
+    mCtx.fillText(yr, x, H - PAD.b + 16);
+  });
+
+  // Axis labels
+  mCtx.save();
+  mCtx.translate(12, H / 2);
+  mCtx.rotate(-Math.PI / 2);
+  mCtx.fillStyle = 'rgba(255,107,43,0.5)';
+  mCtx.font = '8px Space Mono, monospace';
+  mCtx.textAlign = 'center';
+  mCtx.letterSpacing = '0.1em';
+  mCtx.fillText('BOX OFFICE / SALES ($M)', 0, 0);
+  mCtx.restore();
+
+  // Group by year for gap lines
+  const byYr = {};
+  fd.forEach(d => {
+    if (!byYr[d.yr]) byYr[d.yr] = {};
+    byYr[d.yr][d.type + '_' + d.role] = d;
+  });
+
+  // Draw gap lines (dashed connector between critic and top grosser)
+  Object.keys(byYr).forEach(yr => {
+    ['movie', 'game'].forEach(t => {
+      const cr = byYr[yr][t + '_critic'];
+      const tp = byYr[yr][t + '_top'];
+      if (!cr || !tp || cr.title === tp.title) return;
+      const offset = t === 'movie' ? -4 : 4;
+      const xv = xF(+yr, W) + offset;
+      const y1 = yF(cr.gross, maxG, H) * prog + (H / 2) * (1 - prog);
+      const y2 = yF(tp.gross, maxG, H) * prog + (H / 2) * (1 - prog);
+      const grad = mCtx.createLinearGradient(0, Math.min(y1, y2), 0, Math.max(y1, y2));
+      grad.addColorStop(0, 'rgba(255,107,43,0.55)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.1)');
+      mCtx.strokeStyle = grad;
+      mCtx.lineWidth = 1;
+      mCtx.setLineDash([2, 4]);
+      mCtx.beginPath(); mCtx.moveTo(xv, y1); mCtx.lineTo(xv, y2); mCtx.stroke();
+      mCtx.setLineDash([]);
+    });
+  });
+
+  // Draw points
+  const pts = [];
+  fd.forEach(d => {
+    const offset = d.type === 'movie' ? -5 : 5;
+    const xv = xF(d.yr, W) + offset;
+    const yv = yF(d.gross, maxG, H) * prog + (H / 2) * (1 - prog);
+    const r = scoreToR(d.score) * Math.min(prog * 1.8, 1);
+    const isCritic = d.role === 'critic';
+    const isHov = hoveredPt && hoveredPt.d === d;
+
+    mCtx.save();
+    mCtx.globalAlpha = isHov ? 1 : (isCritic ? 0.92 : 0.6);
+
+    if (isCritic) {
+      // Outer glow
+      const grd = mCtx.createRadialGradient(xv, yv, 0, xv, yv, r * 2.2);
+      grd.addColorStop(0, 'rgba(255,107,43,0.3)');
+      grd.addColorStop(1, 'rgba(255,107,43,0)');
+      mCtx.beginPath();
+      if (d.type === 'movie') mCtx.arc(xv, yv, r * 2.2, 0, Math.PI * 2);
+      else { const s = r * 2.2; mCtx.moveTo(xv, yv - s); mCtx.lineTo(xv + s, yv); mCtx.lineTo(xv, yv + s); mCtx.lineTo(xv - s, yv); mCtx.closePath(); }
+      mCtx.fillStyle = grd;
+      mCtx.fill();
+    }
+
+    if (d.type === 'movie') {
+      mCtx.beginPath();
+      mCtx.arc(xv, yv, r, 0, Math.PI * 2);
+      if (isCritic) {
+        mCtx.fillStyle = '#FF6B2B';
+        mCtx.fill();
+      } else {
+        mCtx.strokeStyle = 'rgba(255,255,255,0.45)';
+        mCtx.lineWidth = 1.2;
+        mCtx.stroke();
+        mCtx.fillStyle = 'rgba(255,255,255,0.06)';
+        mCtx.fill();
+      }
+      if (isHov) { mCtx.strokeStyle = '#fff'; mCtx.lineWidth = 1.5; mCtx.beginPath(); mCtx.arc(xv, yv, r + 2, 0, Math.PI * 2); mCtx.stroke(); }
+    } else {
+      mCtx.beginPath();
+      mCtx.moveTo(xv, yv - r); mCtx.lineTo(xv + r, yv); mCtx.lineTo(xv, yv + r); mCtx.lineTo(xv - r, yv); mCtx.closePath();
+      if (isCritic) {
+        mCtx.fillStyle = '#FF6B2B';
+        mCtx.fill();
+      } else {
+        mCtx.strokeStyle = 'rgba(255,255,255,0.4)';
+        mCtx.lineWidth = 1.2;
+        mCtx.stroke();
+        mCtx.fillStyle = 'rgba(255,255,255,0.06)';
+        mCtx.fill();
+      }
+      if (isHov) {
+        mCtx.strokeStyle = '#fff'; mCtx.lineWidth = 1.5;
+        mCtx.beginPath(); mCtx.moveTo(xv, yv - r - 3); mCtx.lineTo(xv + r + 3, yv); mCtx.lineTo(xv, yv + r + 3); mCtx.lineTo(xv - r - 3, yv); mCtx.closePath(); mCtx.stroke();
+      }
+    }
+
+    mCtx.restore();
+    pts.push({ d, x: xv, y: yv, r });
+  });
+
+  drawnPts = pts;
+}
+
+function animate() {
+  cancelAnimationFrame(animFrame);
+  animProg = 0;
+  const DUR = 1100;
+  const t0 = performance.now();
+  function step(now) {
+    const raw = (now - t0) / DUR;
+    animProg = Math.min(raw, 1);
+    const ease = 1 - Math.pow(1 - animProg, 4);
+    draw(ease);
+    if (animProg < 1) animFrame = requestAnimationFrame(step);
+  }
+  animFrame = requestAnimationFrame(step);
+}
+
+// Tooltip
+const ttEl = document.getElementById('tooltip');
+mainCanvas.addEventListener('mousemove', e => {
+  const rect = mainCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const cssX = e.clientX - rect.left;
+  const cssY = e.clientY - rect.top;
+  let found = null;
+  for (const p of drawnPts) {
+    const dx = cssX - p.x, dy = cssY - p.y;
+    if (Math.sqrt(dx * dx + dy * dy) < p.r + 8) { found = p; break; }
+  }
+  if (found) {
+    hoveredPt = found;
+    const d = found.d;
+    const gc = GENRE_COLORS[d.genre] || '#FF6B2B';
+    document.getElementById('tt-name').textContent = d.title;
+    const tag = document.getElementById('tt-tag');
+    tag.textContent = d.genre;
+    tag.style.background = gc + '22'; tag.style.color = gc; tag.style.border = '1px solid ' + gc + '55';
+    document.getElementById('tt-gross').textContent = '$' + d.gross.toLocaleString() + 'M';
+    document.getElementById('tt-score').textContent = d.score + ' / 100';
+    document.getElementById('tt-genre').textContent = d.genre;
+    document.getElementById('tt-role').textContent = (d.role === 'critic' ? (d.type === 'movie' ? '🏆 Oscar Winner' : '🎮 Game of the Year') : '💰 Top Grosser') + ' · ' + d.yr;
+    // Position
+    const tipW = 220;
+    let lx = e.clientX + 16;
+    if (lx + tipW > window.innerWidth - 10) lx = e.clientX - tipW - 12;
+    ttEl.style.left = lx + 'px';
+    ttEl.style.top = (e.clientY - 10) + 'px';
+    ttEl.style.opacity = '1';
+  } else {
+    hoveredPt = null;
+    ttEl.style.opacity = '0';
+  }
+  draw(1);
+});
+mainCanvas.addEventListener('mouseleave', () => {
+  hoveredPt = null;
+  ttEl.style.opacity = '0';
+  draw(1);
+});
+
+// Filters
+document.querySelectorAll('.btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.btn').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    activeFilter = b.dataset.f;
+    buildMetrics();
+    buildGap();
+    animate();
+  });
+});
+
+// Metrics
+function buildMetrics() {
+  const fd = getFiltered();
+  const critics = fd.filter(d => d.role === 'critic');
+  const tops = fd.filter(d => d.role === 'top');
+  const avgCrit = Math.round(critics.reduce((a, d) => a + d.gross, 0) / critics.length);
+  const avgTop = Math.round(tops.reduce((a, d) => a + d.gross, 0) / tops.length);
+  const avgScore = Math.round(critics.reduce((a, d) => a + d.score, 0) / critics.length);
+  const yrs = [...new Set(fd.map(d => d.yr))];
+  let bigGap = 0, bigYr = '—';
+  yrs.forEach(yr => {
+    const mc = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'critic');
+    const mt = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'top');
+    if (mc && mt && mc.title !== mt.title) {
+      const g = mt.gross - mc.gross;
+      if (g > bigGap) { bigGap = g; bigYr = yr; }
+    }
+  });
+  document.getElementById('metrics').innerHTML = `
+    <div class="metric"><div class="m-label">Avg Critic Pick</div><div class="m-val">$${(avgCrit / 1000).toFixed(1)}B</div><div class="m-sub">earnings</div></div>
+    <div class="metric"><div class="m-label">Avg Top Grosser</div><div class="m-val">$${(avgTop / 1000).toFixed(1)}B</div><div class="m-sub">earnings</div></div>
+    <div class="metric"><div class="m-label">Avg Critic Score</div><div class="m-val">${avgScore}</div><div class="m-sub">out of 100</div></div>
+    <div class="metric"><div class="m-label">Peak Gap Year</div><div class="m-val">${bigYr}</div><div class="m-sub">$${Math.round(bigGap / 100) / 10}B diff</div></div>
+  `;
+}
+
+// Gap chart
+let gapChart = null;
+function buildGap() {
+  const fd = getFiltered();
+  const yrs = [...new Set(fd.map(d => d.yr))].sort();
+  const labels = [], mGaps = [], gGaps = [];
+  yrs.forEach(yr => {
+    const mc = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'critic');
+    const mt = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'top');
+    const gc2 = fd.find(d => d.yr === yr && d.type === 'game' && d.role === 'critic');
+    const gt = fd.find(d => d.yr === yr && d.type === 'game' && d.role === 'top');
+    const hasMov = mc && mt && mc.title !== mt.title;
+    const hasGam = gc2 && gt && gc2.title !== gt.title;
+    if (hasMov || hasGam) {
+      labels.push("'" + String(yr).slice(2));
+      mGaps.push(hasMov ? Math.round(mt.gross - mc.gross) : null);
+      gGaps.push(hasGam ? Math.round(gt.gross - gc2.gross) : null);
+    }
+  });
+
+  const gapC = document.getElementById('gapCanvas');
+  const bW = Math.max(labels.length * 42 + 80, 500);
+  gapC.style.width = bW + 'px'; gapC.style.height = '140px';
+  gapC.width = bW * (window.devicePixelRatio || 1);
+  gapC.height = 140 * (window.devicePixelRatio || 1);
+
+  if (gapChart) gapChart.destroy();
+  gapChart = new Chart(gapC, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Movie gap', data: mGaps,
+          backgroundColor: 'rgba(255,107,43,0.72)',
+          borderRadius: 2, borderSkipped: false
+        },
+        {
+          label: 'Game gap', data: gGaps,
+          backgroundColor: 'rgba(255,255,255,0.22)',
+          borderRadius: 2, borderSkipped: false
+        }
+      ]
+    },
+    options: {
+      responsive: false,
+      animation: { duration: 750, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10,10,11,0.96)',
+          borderColor: 'rgba(255,107,43,0.4)', borderWidth: 1,
+          titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.55)',
+          titleFont: { family: 'Space Mono, monospace', size: 11 },
+          bodyFont: { family: 'Space Mono, monospace', size: 10 },
+          callbacks: {
+            label: c => '$' + Math.round(c.raw).toLocaleString() + 'M gap'
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: 'rgba(255,255,255,0.28)', font: { family: 'Space Mono, monospace', size: 9 } },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        },
+        y: {
+          ticks: { color: 'rgba(255,255,255,0.22)', font: { family: 'Space Mono, monospace', size: 9 }, callback: v => '$' + v + 'M' },
+          grid: { color: 'rgba(255,255,255,0.04)' }
+        }
+      }
+    }
+  });
+}
+
+// Init
+function init() {
+  setCanvasSize();
+  buildMetrics();
+  buildGap();
+  animate();
+}
+window.addEventListener('resize', () => { setCanvasSize(); draw(1); buildGap(); });
+init();
+</script>
+</body>
+</html>
