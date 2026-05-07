@@ -2,356 +2,101 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Critics vs Crowds — 30 Years of Movies & Games</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-:root {
-  --orange: #FF6B2B;
-  --orange-dim: rgba(255,107,43,0.18);
-  --orange-glow: rgba(255,107,43,0.35);
-  --bg: #0c0c0d;
-  --bg2: #111113;
-  --bg3: #181819;
-  --border: rgba(255,255,255,0.07);
-  --border-orange: rgba(255,107,43,0.3);
-  --text: #e8e6e1;
-  --text-dim: rgba(232,230,225,0.45);
-  --text-faint: rgba(232,230,225,0.2);
-  --mono: 'Space Mono', monospace;
-  --sans: 'Space Grotesk', sans-serif;
-}
+:root{--or:#FF6B2B;--or2:rgba(255,107,43,0.18);--or3:rgba(255,107,43,0.35);--bg:#0c0c0d;--bg2:#111113;--bg3:#181819;--brd:rgba(255,255,255,0.07);--bro:rgba(255,107,43,0.3);--tx:#e8e6e1;--txd:rgba(232,230,225,0.45);--txf:rgba(232,230,225,0.2);--mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.5}
+.wrap{max-width:1100px;margin:0 auto;padding:36px 20px 60px;position:relative;z-index:1}
+.eyebrow{font-family:var(--mono);font-size:10px;color:var(--or);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';display:inline-block;width:28px;height:1px;background:var(--or)}
+h1{font-family:var(--mono);font-size:clamp(22px,4vw,40px);font-weight:700;line-height:1.1;color:#fff;margin-bottom:10px}
+h1 span{color:var(--or)}
+.subtitle{font-size:13px;color:var(--txd);max-width:560px;line-height:1.7;font-weight:300;margin-bottom:28px}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px}
+@media(max-width:600px){.metrics{grid-template-columns:repeat(2,1fr)}}
+.metric{background:var(--bg2);border:1px solid var(--brd);border-radius:3px;padding:13px 15px;transition:border-color .2s,background .2s;cursor:default}
+.metric:hover{border-color:var(--bro);background:rgba(255,107,43,0.04)}
+.m-label{font-family:var(--mono);font-size:9px;color:var(--txf);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}
+.m-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--or);line-height:1;margin-bottom:2px}
+.m-sub{font-size:11px;color:var(--txd)}
 
-html { scroll-behavior: smooth; }
+/* INSIGHTS */
+.insight-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:28px}
+@media(max-width:640px){.insight-strip{grid-template-columns:1fr}}
+.insight{background:var(--bg2);border:1px solid var(--brd);border-left:3px solid var(--or);border-radius:3px;padding:13px 15px}
+.ins-yr{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--or);margin-bottom:4px}
+.ins-txt{font-size:12px;color:var(--txd);line-height:1.6}
+.ins-txt strong{color:var(--tx);font-weight:500}
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+/* TABS */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--brd);margin-bottom:20px}
+.tab{padding:9px 18px;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--txd);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab:hover{color:var(--tx)}
+.tab.on{color:var(--or);border-bottom-color:var(--or)}
 
-/* Grain overlay */
-body::before {
-  content: '';
-  position: fixed; inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events: none; z-index: 0; opacity: .6;
-}
+/* FILTER + ZOOM ROW */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;align-items:center}
+.ctl-label{font-family:var(--mono);font-size:9px;color:var(--txf);letter-spacing:.12em;text-transform:uppercase;margin-right:2px}
+.btn{padding:5px 13px;background:transparent;border:1px solid rgba(255,255,255,0.1);color:var(--txd);font-family:var(--mono);font-size:10px;letter-spacing:.07em;cursor:pointer;border-radius:2px;transition:all .15s;text-transform:uppercase}
+.btn:hover{border-color:var(--or);color:var(--or)}
+.btn.on{background:var(--or2);border-color:var(--or);color:var(--or)}
+.zoom-row{display:flex;align-items:center;gap:10px;margin-bottom:14px;font-family:var(--mono);font-size:10px;color:var(--txd)}
+.zoom-hint{font-size:10px;color:rgba(255,107,43,0.5);font-family:var(--mono);letter-spacing:.05em}
+input[type=range]{-webkit-appearance:none;appearance:none;height:3px;background:var(--brd);border-radius:2px;outline:none;cursor:pointer;width:140px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;background:var(--or);border-radius:50%;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;background:var(--or);border-radius:50%;border:none;cursor:pointer}
 
-.wrap { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; position: relative; z-index: 1; }
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px;font-family:var(--mono);font-size:10px;color:var(--txd)}
+.li{display:flex;align-items:center;gap:6px}
 
-/* ── HEADER ── */
-header { margin-bottom: 40px; }
+/* CHART PANELS */
+.panel{display:none}
+.panel.active{display:block}
+.chart-box{background:var(--bg2);border:1px solid var(--brd);border-radius:4px;padding:18px 14px 10px;position:relative;margin-bottom:20px;overflow:hidden}
+.box-tag{position:absolute;top:12px;right:14px;font-family:var(--mono);font-size:9px;color:var(--txf);letter-spacing:.12em;text-transform:uppercase}
+#mainCanvas{display:block;width:100%;cursor:crosshair;touch-action:none}
 
-.eyebrow {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--orange);
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  margin-bottom: 10px;
-  display: flex; align-items: center; gap: 10px;
-}
-.eyebrow::before {
-  content: '';
-  display: inline-block; width: 28px; height: 1px;
-  background: var(--orange);
-}
+/* TOOLTIP */
+#tooltip{position:fixed;background:rgba(8,8,9,0.97);border:1px solid var(--bro);border-radius:3px;padding:12px 15px;font-family:var(--sans);font-size:12px;pointer-events:none;opacity:0;transition:opacity .1s;z-index:999;max-width:220px;min-width:170px;box-shadow:0 4px 28px rgba(0,0,0,0.7)}
+.tt-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:4px;line-height:1.3}
+.tt-tag{display:inline-block;padding:2px 8px;border-radius:2px;font-family:var(--mono);font-size:9px;letter-spacing:.1em;margin-bottom:8px}
+.tt-row{display:flex;justify-content:space-between;gap:10px;margin-bottom:2px;font-size:11px;color:var(--txd)}
+.tt-row .v{color:#fff;font-weight:500;font-family:var(--mono)}
+.tt-div{height:1px;background:var(--brd);margin:7px 0}
+.tt-role{font-family:var(--mono);font-size:9px;color:var(--or);letter-spacing:.1em;text-transform:uppercase}
+.zoom-notice{text-align:center;font-family:var(--mono);font-size:11px;color:rgba(255,107,43,0.4);padding:10px 0 4px;letter-spacing:.06em}
 
-h1 {
-  font-family: var(--mono);
-  font-size: clamp(24px, 4vw, 42px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -.01em;
-  color: #fff;
-  margin-bottom: 12px;
-}
+/* GAP CHART */
+.gap-section{background:var(--bg2);border:1px solid var(--brd);border-radius:4px;padding:18px 14px 14px;margin-bottom:20px}
+.sec-label{font-family:var(--mono);font-size:9px;color:var(--or);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.gap-legend{display:flex;gap:14px;font-family:var(--mono);font-size:9px;color:var(--txd);margin-bottom:12px}
+.gap-legend .dot{display:inline-block;width:8px;height:8px;border-radius:1px;margin-right:5px;vertical-align:middle}
+.gap-scroll{overflow-x:auto;padding-bottom:4px}
 
-h1 span { color: var(--orange); }
+/* WAVE / STREAM CHART */
+.wave-section{background:var(--bg2);border:1px solid var(--brd);border-radius:4px;padding:18px 14px 14px;margin-bottom:20px}
+.wave-legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;font-family:var(--mono);font-size:9px;color:var(--txd)}
+.wli{display:flex;align-items:center;gap:5px}
+.wdot{width:10px;height:10px;border-radius:1px;flex-shrink:0}
 
-.subtitle {
-  font-size: 13px;
-  color: var(--text-dim);
-  max-width: 560px;
-  line-height: 1.7;
-  font-weight: 300;
-}
+/* GENRE DONUT */
+.donut-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:600px){.donut-grid{grid-template-columns:1fr}}
+.donut-box{background:var(--bg2);border:1px solid var(--brd);border-radius:4px;padding:16px 14px}
+.donut-title{font-family:var(--mono);font-size:9px;color:var(--or);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
 
-/* ── METRICS ROW ── */
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 32px;
-}
-
-@media(max-width: 600px) { .metrics { grid-template-columns: repeat(2, 1fr); } }
-
-.metric {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 14px 16px;
-  position: relative;
-  overflow: hidden;
-  transition: border-color .2s;
-}
-.metric::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, var(--orange-dim) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity .3s;
-}
-.metric:hover::after { opacity: 1; }
-.metric:hover { border-color: var(--border-orange); }
-
-.m-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-faint);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-.m-val {
-  font-family: var(--mono);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--orange);
-  line-height: 1;
-  margin-bottom: 3px;
-}
-.m-sub {
-  font-size: 11px;
-  color: var(--text-dim);
-}
-
-/* ── CONTROLS ── */
-.controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 20px;
-  align-items: center;
-}
-
-.ctl-label {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-faint);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  margin-right: 4px;
-}
-
-.btn {
-  padding: 5px 14px;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: var(--text-dim);
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: .08em;
-  cursor: pointer;
-  border-radius: 2px;
-  transition: all .15s;
-  text-transform: uppercase;
-}
-.btn:hover { border-color: var(--orange); color: var(--orange); }
-.btn.on { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); }
-
-/* ── LEGEND ── */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-bottom: 16px;
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text-dim);
-}
-.li { display: flex; align-items: center; gap: 7px; }
-.lc { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.ld { width: 10px; height: 10px; transform: rotate(45deg); flex-shrink: 0; }
-
-/* ── MAIN CANVAS AREA ── */
-.chart-area {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 20px 16px 12px;
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.chart-area .section-tag {
-  position: absolute;
-  top: 14px; right: 16px;
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-faint);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-}
-
-#mainCanvas {
-  display: block;
-  width: 100%;
-  cursor: crosshair;
-}
-
-/* ── TOOLTIP ── */
-#tooltip {
-  position: fixed;
-  background: rgba(10,10,11,0.97);
-  border: 1px solid var(--border-orange);
-  border-radius: 3px;
-  padding: 13px 16px;
-  font-family: var(--sans);
-  font-size: 12px;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .12s;
-  z-index: 100;
-  max-width: 220px;
-  min-width: 180px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 4px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,107,43,0.1);
-}
-
-.tt-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  margin-bottom: 5px;
-  line-height: 1.3;
-}
-.tt-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 2px;
-  font-family: var(--mono);
-  font-size: 9px;
-  letter-spacing: .1em;
-  margin-bottom: 9px;
-}
-.tt-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 8px 0;
-}
-.tt-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 3px;
-  font-size: 11px;
-  color: var(--text-dim);
-}
-.tt-row .val { color: #fff; font-weight: 500; font-family: var(--mono); }
-.tt-role {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--orange);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  margin-top: 8px;
-}
-
-/* ── GAP CHART ── */
-.gap-area {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 20px 16px 16px;
-}
-.gap-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.gap-title {
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--orange);
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-.gap-legend {
-  display: flex;
-  gap: 14px;
-  font-family: var(--mono);
-  font-size: 9px;
-  color: var(--text-dim);
-}
-.gap-legend .dot {
-  display: inline-block;
-  width: 8px; height: 8px;
-  border-radius: 1px;
-  margin-right: 5px;
-}
-.gap-scroll { overflow-x: auto; padding-bottom: 4px; }
-#gapCanvas { display: block; }
-
-/* ── INSIGHT STRIP ── */
-.insight-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-top: 24px;
-}
-@media(max-width: 640px) { .insight-strip { grid-template-columns: 1fr; } }
-.insight {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  padding: 14px 16px;
-  border-left: 3px solid var(--orange);
-}
-.insight-year {
-  font-family: var(--mono);
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--orange);
-  margin-bottom: 4px;
-}
-.insight-text {
-  font-size: 12px;
-  color: var(--text-dim);
-  line-height: 1.6;
-}
-
-/* Scan line animation for the main chart */
-@keyframes scanPulse {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-/* Fade in */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.wrap > * { animation: fadeUp .6s ease both; }
-header       { animation-delay: .05s; }
-.metrics     { animation-delay: .15s; }
-.controls    { animation-delay: .22s; }
-.legend      { animation-delay: .27s; }
-.chart-area  { animation-delay: .32s; }
-.gap-area    { animation-delay: .40s; }
-.insight-strip { animation-delay: .48s; }
+/* FADE IN */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.wrap>*{animation:fadeUp .55s ease both}
+header{animation-delay:.05s}.metrics{animation-delay:.12s}.insight-strip{animation-delay:.18s}.tab-bar{animation-delay:.22s}
 </style>
 </head>
 <body>
@@ -359,92 +104,114 @@ header       { animation-delay: .05s; }
 <div id="tooltip">
   <div class="tt-name" id="tt-name"></div>
   <div class="tt-tag" id="tt-tag"></div>
-  <div class="tt-row"><span>Gross</span><span class="val" id="tt-gross"></span></div>
-  <div class="tt-row"><span>Score</span><span class="val" id="tt-score"></span></div>
-  <div class="tt-row"><span>Genre</span><span class="val" id="tt-genre"></span></div>
-  <div class="tt-divider"></div>
+  <div class="tt-row"><span>Gross</span><span class="v" id="tt-gross"></span></div>
+  <div class="tt-row"><span>Score</span><span class="v" id="tt-score"></span></div>
+  <div class="tt-row"><span>Genre</span><span class="v" id="tt-genre"></span></div>
+  <div class="tt-div"></div>
   <div class="tt-role" id="tt-role"></div>
 </div>
 
 <div class="wrap">
-
   <header>
     <div class="eyebrow">Data Visualization &nbsp;·&nbsp; 1994–2024</div>
     <h1>Critics vs <span>Crowds</span></h1>
-    <p class="subtitle">30 years of movies &amp; games — comparing what critics celebrated against what audiences actually paid to see. Oscar Winners vs Box Office. GOTY vs Top Grossing Games. The gap tells the story.</p>
+    <p class="subtitle">30 years of movies & games — comparing what critics celebrated against what audiences actually paid to see. Oscar Winners vs Box Office. GOTY vs Top-Selling Games. The gap tells the story.</p>
   </header>
 
   <div class="metrics" id="metrics"></div>
+  <div class="insight-strip" id="insights"></div>
 
-  <div class="controls" id="btns">
-    <span class="ctl-label">Filter —</span>
-    <button class="btn on" data-f="all">All</button>
-    <button class="btn" data-f="movie">Movies</button>
-    <button class="btn" data-f="game">Games</button>
-    <button class="btn" data-f="1990s">90s</button>
-    <button class="btn" data-f="2000s">2000s</button>
-    <button class="btn" data-f="2010s">2010s</button>
-    <button class="btn" data-f="2020s">2020s</button>
+  <div class="tab-bar">
+    <button class="tab on" data-tab="scatter">Scatter Chart</button>
+    <button class="tab" data-tab="stream">Stream View</button>
+    <button class="tab" data-tab="genre">Genre Breakdown</button>
   </div>
 
-  <div class="legend">
-    <div class="li">
-      <svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#FF6B2B"/></svg>
-      <span>Critic's choice (Oscar / GOTY) — Movie</span>
+  <!-- ═══ SCATTER PANEL ═══ -->
+  <div class="panel active" id="panel-scatter">
+    <div class="toolbar" id="btns">
+      <span class="ctl-label">Filter —</span>
+      <button class="btn on" data-f="all">All</button>
+      <button class="btn" data-f="movie">Movies</button>
+      <button class="btn" data-f="game">Games</button>
+      <button class="btn" data-f="1990s">90s</button>
+      <button class="btn" data-f="2000s">2000s</button>
+      <button class="btn" data-f="2010s">2010s</button>
+      <button class="btn" data-f="2020s">2020s</button>
     </div>
-    <div class="li">
-      <svg width="14" height="14"><polygon points="7,1 13,7 7,13 1,7" fill="#FF6B2B"/></svg>
-      <span>Critic's choice — Game</span>
+    <div class="zoom-row">
+      <span class="ctl-label">Zoom —</span>
+      <input type="range" id="zoomSlider" min="1" max="5" step="0.1" value="1">
+      <span id="zoomVal" style="font-family:var(--mono);font-size:10px;color:var(--or);min-width:28px">1×</span>
+      <span class="zoom-hint">· Hover shows labels at zoom ≥ 2×</span>
     </div>
-    <div class="li">
-      <svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg>
-      <span>Top Grosser — Movie</span>
+    <div class="legend">
+      <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5.5" fill="#FF6B2B"/></svg><span>Critic pick — Movie</span></div>
+      <div class="li"><svg width="13" height="13"><polygon points="6.5,1 12,6.5 6.5,12 1,6.5" fill="#FF6B2B"/></svg><span>GOTY — Game</span></div>
+      <div class="li"><svg width="13" height="13"><circle cx="6.5" cy="6.5" r="5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg><span>Top grosser — Movie</span></div>
+      <div class="li"><svg width="13" height="13"><polygon points="6.5,1 12,6.5 6.5,12 1,6.5" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg><span>Top grosser — Game</span></div>
+      <div class="li" style="color:rgba(255,255,255,0.22)"><span>Bubble size = critic score</span></div>
     </div>
-    <div class="li">
-      <svg width="14" height="14"><polygon points="7,1 13,7 7,13 1,7" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/></svg>
-      <span>Top Grosser — Game</span>
+    <div class="chart-box">
+      <span class="box-tag">Y: Box Office / Sales ($M) &nbsp;·&nbsp; X: Year</span>
+      <div style="overflow:hidden;border-radius:2px"><canvas id="mainCanvas"></canvas></div>
+      <div class="zoom-notice" id="zoomNotice">Zoom in to 2× or more to activate hover tooltips</div>
     </div>
-    <div class="li" style="color: rgba(255,255,255,0.25)">
-      <svg width="14" height="14"><circle cx="7" cy="7" r="4" fill="rgba(255,255,255,0.15)"/></svg>
-      <span>Size = Critic Score</span>
+    <div class="gap-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+        <div class="sec-label" style="margin-bottom:0">Earnings gap — critic pick vs top grosser</div>
+        <div class="gap-legend" style="margin-bottom:0">
+          <span><span class="dot" style="background:#FF6B2B"></span>Movie gap</span>
+          <span><span class="dot" style="background:rgba(255,255,255,0.3)"></span>Game gap</span>
+        </div>
+      </div>
+      <div class="gap-scroll"><canvas id="gapCanvas"></canvas></div>
     </div>
   </div>
 
-  <div class="chart-area">
-    <span class="section-tag">Y-axis: Box Office / Sales ($M) &nbsp;·&nbsp; X-axis: Year</span>
-    <canvas id="mainCanvas"></canvas>
+  <!-- ═══ STREAM PANEL ═══ -->
+  <div class="panel" id="panel-stream">
+    <div class="wave-section">
+      <div class="sec-label">Total earnings by genre over time — Movies</div>
+      <div class="wave-legend" id="movieStreamLegend"></div>
+      <div style="overflow-x:auto"><canvas id="movieStreamCanvas" height="240"></canvas></div>
+    </div>
+    <div class="wave-section">
+      <div class="sec-label">Total earnings by genre over time — Games</div>
+      <div class="wave-legend" id="gameStreamLegend"></div>
+      <div style="overflow-x:auto"><canvas id="gameStreamCanvas" height="240"></canvas></div>
+    </div>
   </div>
 
-  <div class="gap-area">
-    <div class="gap-header">
-      <div class="gap-title">Earnings Gap — Critic Pick vs Top Grosser ($M)</div>
-      <div class="gap-legend">
-        <span><span class="dot" style="background:#FF6B2B;"></span>Movie gap</span>
-        <span><span class="dot" style="background:rgba(255,255,255,0.35);"></span>Game gap</span>
+  <!-- ═══ GENRE PANEL ═══ -->
+  <div class="panel" id="panel-genre">
+    <div class="donut-grid">
+      <div class="donut-box">
+        <div class="donut-title">Movie genres — critic picks (30 yrs)</div>
+        <canvas id="movieCriticDonut" height="220"></canvas>
+      </div>
+      <div class="donut-box">
+        <div class="donut-title">Movie genres — top grossers (30 yrs)</div>
+        <canvas id="movieTopDonut" height="220"></canvas>
+      </div>
+      <div class="donut-box">
+        <div class="donut-title">Game genres — critic picks (30 yrs)</div>
+        <canvas id="gameCriticDonut" height="220"></canvas>
+      </div>
+      <div class="donut-box">
+        <div class="donut-title">Game genres — top grossers (30 yrs)</div>
+        <canvas id="gameTopDonut" height="220"></canvas>
       </div>
     </div>
-    <div class="gap-scroll"><canvas id="gapCanvas"></canvas></div>
   </div>
 
-  <div class="insight-strip">
-    <div class="insight">
-      <div class="insight-year">2009</div>
-      <div class="insight-text">Biggest movie divergence ever. The Hurt Locker ($49M) won Best Picture over Avatar ($2.9B). A $2,874M gap.</div>
-    </div>
-    <div class="insight">
-      <div class="insight-year">2012</div>
-      <div class="insight-text">Games went artsy. Journey (a 2-hour meditation game) beat Call of Duty: Black Ops 2 ($1B) for GOTY.</div>
-    </div>
-    <div class="insight">
-      <div class="insight-year">2018</div>
-      <div class="insight-text">A rare consensus year. Red Dead Redemption 2 was both GOTY and the top-selling game. Critics = Crowds.</div>
-    </div>
-  </div>
-
-</div>
+</div><!-- /wrap -->
 
 <script>
-const DATA = [
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const DATA=[
   {yr:1994,type:'movie',role:'critic',title:'Forrest Gump',gross:678,score:82,genre:'Drama'},
   {yr:1994,type:'movie',role:'top',title:'The Lion King',gross:763,score:88,genre:'Animation'},
   {yr:1994,type:'game',role:'critic',title:'Final Fantasy VI',gross:40,score:92,genre:'RPG'},
@@ -461,14 +228,14 @@ const DATA = [
   {yr:1997,type:'movie',role:'top',title:'Titanic',gross:2187,score:88,genre:'Drama'},
   {yr:1997,type:'game',role:'critic',title:'GoldenEye 007',gross:250,score:96,genre:'FPS'},
   {yr:1997,type:'game',role:'top',title:'Final Fantasy VII',gross:330,score:92,genre:'RPG'},
-  {yr:1998,type:'movie',role:'critic',title:"Shakespeare in Love",gross:289,score:87,genre:'Drama'},
+  {yr:1998,type:'movie',role:'critic',title:'Shakespeare in Love',gross:289,score:87,genre:'Drama'},
   {yr:1998,type:'movie',role:'top',title:'Saving Private Ryan',gross:482,score:91,genre:'War'},
   {yr:1998,type:'game',role:'critic',title:'Zelda: Ocarina of Time',gross:300,score:99,genre:'Adventure'},
-  {yr:1998,type:'game',role:'top',title:'Pokémon Red/Blue',gross:500,score:87,genre:'RPG'},
+  {yr:1998,type:'game',role:'top',title:'Pokemon Red/Blue',gross:500,score:87,genre:'RPG'},
   {yr:1999,type:'movie',role:'critic',title:'American Beauty',gross:356,score:88,genre:'Drama'},
   {yr:1999,type:'movie',role:'top',title:'The Phantom Menace',gross:1027,score:55,genre:'Sci-Fi'},
   {yr:1999,type:'game',role:'critic',title:'Planescape: Torment',gross:30,score:91,genre:'RPG'},
-  {yr:1999,type:'game',role:'top',title:'Pokémon Yellow',gross:480,score:84,genre:'RPG'},
+  {yr:1999,type:'game',role:'top',title:'Pokemon Yellow',gross:480,score:84,genre:'RPG'},
   {yr:2000,type:'movie',role:'critic',title:'Gladiator',gross:460,score:76,genre:'Action'},
   {yr:2000,type:'movie',role:'top',title:'Mission: Impossible 2',gross:546,score:58,genre:'Action'},
   {yr:2000,type:'game',role:'critic',title:"Zelda: Majora's Mask",gross:180,score:95,genre:'Adventure'},
@@ -484,7 +251,7 @@ const DATA = [
   {yr:2003,type:'movie',role:'critic',title:'Return of the King',gross:1120,score:94,genre:'Fantasy'},
   {yr:2003,type:'movie',role:'top',title:'Return of the King',gross:1120,score:94,genre:'Fantasy'},
   {yr:2003,type:'game',role:'critic',title:'KOTOR',gross:200,score:94,genre:'RPG'},
-  {yr:2003,type:'game',role:'top',title:'Pokémon Ruby/Sapphire',gross:520,score:82,genre:'RPG'},
+  {yr:2003,type:'game',role:'top',title:'Pokemon Ruby/Sapphire',gross:520,score:82,genre:'RPG'},
   {yr:2004,type:'movie',role:'critic',title:'Million Dollar Baby',gross:216,score:86,genre:'Drama'},
   {yr:2004,type:'movie',role:'top',title:'Shrek 2',gross:920,score:89,genre:'Animation'},
   {yr:2004,type:'game',role:'critic',title:'Half-Life 2',gross:300,score:96,genre:'FPS'},
@@ -492,7 +259,7 @@ const DATA = [
   {yr:2005,type:'movie',role:'critic',title:'Crash',gross:98,score:75,genre:'Drama'},
   {yr:2005,type:'movie',role:'top',title:'Star Wars: Revenge of the Sith',gross:848,score:80,genre:'Sci-Fi'},
   {yr:2005,type:'game',role:'critic',title:'Resident Evil 4',gross:300,score:96,genre:'Horror'},
-  {yr:2005,type:'game',role:'top',title:'Pokémon Emerald',gross:460,score:76,genre:'RPG'},
+  {yr:2005,type:'game',role:'top',title:'Pokemon Emerald',gross:460,score:76,genre:'RPG'},
   {yr:2006,type:'movie',role:'critic',title:'The Departed',gross:290,score:85,genre:'Crime'},
   {yr:2006,type:'movie',role:'top',title:'Pirates of the Caribbean 2',gross:1066,score:53,genre:'Adventure'},
   {yr:2006,type:'game',role:'critic',title:'Zelda: Twilight Princess',gross:350,score:96,genre:'Adventure'},
@@ -571,396 +338,605 @@ const DATA = [
   {yr:2024,type:'game',role:'top',title:'Black Myth: Wukong',gross:1000,score:82,genre:'Action-RPG'},
 ];
 
-const GENRE_COLORS = {
-  Drama:'#FF6B2B', Action:'#e05520', Animation:'#f0a040', Fantasy:'#cc4488',
-  'Sci-Fi':'#3a8fff', War:'#888', Crime:'#aaa88a', Thriller:'#cc9922',
-  RPG:'#00c896', FPS:'#ff3355', Horror:'#cc2222', Adventure:'#33aacc',
-  'Action-RPG':'#aa77ff', Sports:'#88dd33', Platformer:'#ffbb22',
-  'Open World':'#22ccaa', Survival:'#ee5533', Simulation:'#55aaff', Comedy:'#ffdd44'
+const GCOL={
+  Drama:'#FF6B2B',Action:'#e05520',Animation:'#f0a040',Fantasy:'#cc4488',
+  'Sci-Fi':'#3a8fff',War:'#7a8a7a',Crime:'#aaaa88',Thriller:'#ccaa22',
+  RPG:'#00c896',FPS:'#ff3355',Horror:'#cc2222',Adventure:'#33aacc',
+  'Action-RPG':'#aa77ff',Sports:'#88dd33',Platformer:'#ffbb22',
+  'Open World':'#22ccaa',Survival:'#ee5533',Simulation:'#55aaff',Comedy:'#ffdd44'
 };
 
-const MIN_YR = 1994, MAX_YR = 2024;
-const PAD = { t: 30, r: 20, b: 50, l: 72 };
+// ═══════════════════════════════════════════
+// SCATTER CHART
+// ═══════════════════════════════════════════
+const MIN_YR=1994, MAX_YR=2024;
+const PAD={t:30,r:18,b:52,l:70};
+let activeFilter='all';
+let zoomLevel=1;
+let panOffset=0; // 0..1 normalised
+let animProg=0, animFrame;
+let drawnPts=[];
+let hoveredPt=null;
+let cssW=660, cssH=380;
 
-let activeFilter = 'all';
-let animProg = 0, animFrame;
-let drawnPts = [];
-let hoveredPt = null;
+const mainCanvas=document.getElementById('mainCanvas');
+const mCtx=mainCanvas.getContext('2d');
 
-const mainCanvas = document.getElementById('mainCanvas');
-const mCtx = mainCanvas.getContext('2d');
-
-function getFiltered() {
-  return DATA.filter(d => {
-    if (activeFilter === 'movie') return d.type === 'movie';
-    if (activeFilter === 'game') return d.type === 'game';
-    if (activeFilter === '1990s') return d.yr <= 1999;
-    if (activeFilter === '2000s') return d.yr >= 2000 && d.yr <= 2009;
-    if (activeFilter === '2010s') return d.yr >= 2010 && d.yr <= 2019;
-    if (activeFilter === '2020s') return d.yr >= 2020;
+function getFiltered(){
+  return DATA.filter(d=>{
+    if(activeFilter==='movie') return d.type==='movie';
+    if(activeFilter==='game') return d.type==='game';
+    if(activeFilter==='1990s') return d.yr<=1999;
+    if(activeFilter==='2000s') return d.yr>=2000&&d.yr<=2009;
+    if(activeFilter==='2010s') return d.yr>=2010&&d.yr<=2019;
+    if(activeFilter==='2020s') return d.yr>=2020;
     return true;
   });
 }
 
-function setCanvasSize() {
-  const w = mainCanvas.parentElement.clientWidth - 32;
-  const dpr = window.devicePixelRatio || 1;
-  const cssW = Math.max(w, 320);
-  const cssH = Math.round(cssW * 0.58);
-  mainCanvas.style.width = cssW + 'px';
-  mainCanvas.style.height = cssH + 'px';
-  mainCanvas.width = cssW * dpr;
-  mainCanvas.height = cssH * dpr;
-  mCtx.scale(dpr, dpr);
-  return { W: cssW, H: cssH };
+function setSize(){
+  const container=mainCanvas.closest('.chart-box');
+  const w=container.clientWidth-28;
+  cssW=Math.max(w,300);
+  cssH=Math.round(cssW*0.56);
+  mainCanvas.style.width=cssW+'px';
+  mainCanvas.style.height=cssH+'px';
+  const dpr=window.devicePixelRatio||1;
+  mainCanvas.width=Math.round(cssW*dpr);
+  mainCanvas.height=Math.round(cssH*dpr);
+  mCtx.setTransform(dpr,0,0,dpr,0,0);
 }
 
-function xF(yr, W) {
-  return PAD.l + (yr - MIN_YR) / (MAX_YR - MIN_YR) * (W - PAD.l - PAD.r);
+// Convert year to X using zoom + pan
+function xF(yr){
+  const plotW=cssW-PAD.l-PAD.r;
+  const totalSpan=MAX_YR-MIN_YR;
+  const visibleSpan=totalSpan/zoomLevel;
+  const startYr=MIN_YR+panOffset*(totalSpan-visibleSpan);
+  return PAD.l+(yr-startYr)/visibleSpan*plotW;
 }
-function yF(g, maxG, H) {
-  return PAD.t + (1 - g / maxG) * (H - PAD.t - PAD.b);
+function yF(g,maxG){
+  return PAD.t+(1-g/maxG)*(cssH-PAD.t-PAD.b);
 }
-function scoreToR(s) {
-  return 5 + ((s - 60) / 40) * 12;
+function scoreR(s){return Math.max(4, 5+((s-60)/40)*11);}
+
+function getVisibleYrRange(){
+  const totalSpan=MAX_YR-MIN_YR;
+  const visibleSpan=totalSpan/zoomLevel;
+  const startYr=MIN_YR+panOffset*(totalSpan-visibleSpan);
+  const endYr=startYr+visibleSpan;
+  return {startYr,endYr};
 }
 
-const DECADES = [
-  { s: 1994, e: 1999, label: '90s' },
-  { s: 2000, e: 2009, label: '2000s' },
-  { s: 2010, e: 2019, label: '2010s' },
-  { s: 2020, e: 2024, label: '2020s' },
+const DECADES=[
+  {s:1994,e:1999,label:'90s'},{s:2000,e:2009,label:'2000s'},
+  {s:2010,e:2019,label:'2010s'},{s:2020,e:2024,label:'2020s'}
 ];
 
-function draw(prog) {
-  const { W, H } = { W: parseInt(mainCanvas.style.width), H: parseInt(mainCanvas.style.height) };
-  mCtx.clearRect(0, 0, W, H);
-
-  const fd = getFiltered();
-  const maxG = Math.max(...fd.map(d => d.gross)) * 1.13;
+function draw(prog){
+  mCtx.clearRect(0,0,cssW,cssH);
+  const fd=getFiltered();
+  const maxG=Math.max(...fd.map(d=>d.gross))*1.13||3000;
+  const {startYr,endYr}=getVisibleYrRange();
 
   // Decade bands
-  DECADES.forEach((d, i) => {
-    const x1 = xF(d.s, W);
-    const x2 = xF(Math.min(d.e, MAX_YR) + 0.9, W);
-    mCtx.fillStyle = i % 2 === 0 ? 'rgba(255,107,43,0.03)' : 'rgba(255,255,255,0.018)';
-    mCtx.fillRect(x1, PAD.t, x2 - x1, H - PAD.t - PAD.b);
-    mCtx.fillStyle = 'rgba(255,107,43,0.3)';
-    mCtx.font = '9px Space Mono, monospace';
-    mCtx.textAlign = 'center';
-    mCtx.fillText(d.label, (x1 + x2) / 2, PAD.t - 10);
+  DECADES.forEach((d,i)=>{
+    const x1=xF(Math.max(d.s,startYr-1));
+    const x2=xF(Math.min(d.e+0.9,endYr+1));
+    if(x2<PAD.l||x1>cssW-PAD.r) return;
+    mCtx.fillStyle=i%2===0?'rgba(255,107,43,0.04)':'rgba(255,255,255,0.018)';
+    mCtx.fillRect(Math.max(x1,PAD.l),PAD.t,Math.min(x2,cssW-PAD.r)-Math.max(x1,PAD.l),cssH-PAD.t-PAD.b);
+    const midX=(Math.max(x1,PAD.l)+Math.min(x2,cssW-PAD.r))/2;
+    if(midX>PAD.l&&midX<cssW-PAD.r){
+      mCtx.fillStyle='rgba(255,107,43,0.35)';
+      mCtx.font='9px Space Mono,monospace';
+      mCtx.textAlign='center';
+      mCtx.fillText(d.label,midX,PAD.t-10);
+    }
   });
 
-  // Grid lines Y
-  const gridVals = [0, 500, 1000, 1500, 2000, 2500, 3000];
-  gridVals.forEach(v => {
-    if (v > maxG) return;
-    const y = yF(v, maxG, H);
-    mCtx.strokeStyle = 'rgba(255,255,255,0.05)';
-    mCtx.lineWidth = 0.5;
-    mCtx.beginPath(); mCtx.moveTo(PAD.l, y); mCtx.lineTo(W - PAD.r, y); mCtx.stroke();
-    mCtx.fillStyle = 'rgba(255,255,255,0.22)';
-    mCtx.font = '9px Space Mono, monospace';
-    mCtx.textAlign = 'right';
-    mCtx.fillText('$' + v + 'M', PAD.l - 6, y + 3.5);
+  // Y grid
+  [0,500,1000,1500,2000,2500,3000].forEach(v=>{
+    if(v>maxG) return;
+    const y=yF(v,maxG);
+    mCtx.strokeStyle='rgba(255,255,255,0.05)';
+    mCtx.lineWidth=0.5;
+    mCtx.beginPath();mCtx.moveTo(PAD.l,y);mCtx.lineTo(cssW-PAD.r,y);mCtx.stroke();
+    mCtx.fillStyle='rgba(255,255,255,0.25)';
+    mCtx.font='9px Space Mono,monospace';
+    mCtx.textAlign='right';
+    mCtx.fillText('$'+v+'M',PAD.l-5,y+3);
   });
 
-  // Grid lines X + labels
-  const xYears = [1994, 1997, 2000, 2003, 2006, 2009, 2012, 2015, 2018, 2021, 2024];
-  xYears.forEach(yr => {
-    const x = xF(yr, W);
-    mCtx.strokeStyle = 'rgba(255,255,255,0.04)';
-    mCtx.lineWidth = 0.5;
-    mCtx.beginPath(); mCtx.moveTo(x, PAD.t); mCtx.lineTo(x, H - PAD.b); mCtx.stroke();
-    mCtx.fillStyle = 'rgba(255,255,255,0.28)';
-    mCtx.font = '9px Space Mono, monospace';
-    mCtx.textAlign = 'center';
-    mCtx.fillText(yr, x, H - PAD.b + 16);
+  // X grid + labels — dynamic based on zoom
+  const allYrs=Array.from({length:31},(_,i)=>1994+i);
+  const step=zoomLevel>=4?1:zoomLevel>=2?2:3;
+  allYrs.forEach(yr=>{
+    if((yr-1994)%step!==0) return;
+    const x=xF(yr);
+    if(x<PAD.l-2||x>cssW-PAD.r+2) return;
+    mCtx.strokeStyle='rgba(255,255,255,0.04)';
+    mCtx.lineWidth=0.5;
+    mCtx.beginPath();mCtx.moveTo(x,PAD.t);mCtx.lineTo(x,cssH-PAD.b);mCtx.stroke();
+    mCtx.fillStyle='rgba(255,255,255,0.3)';
+    mCtx.font='9px Space Mono,monospace';
+    mCtx.textAlign='center';
+    mCtx.fillText(yr,x,cssH-PAD.b+16);
   });
 
-  // Axis labels
+  // Axis label
   mCtx.save();
-  mCtx.translate(12, H / 2);
-  mCtx.rotate(-Math.PI / 2);
-  mCtx.fillStyle = 'rgba(255,107,43,0.5)';
-  mCtx.font = '8px Space Mono, monospace';
-  mCtx.textAlign = 'center';
-  mCtx.letterSpacing = '0.1em';
-  mCtx.fillText('BOX OFFICE / SALES ($M)', 0, 0);
+  mCtx.translate(12,cssH/2);
+  mCtx.rotate(-Math.PI/2);
+  mCtx.fillStyle='rgba(255,107,43,0.45)';
+  mCtx.font='8px Space Mono,monospace';
+  mCtx.textAlign='center';
+  mCtx.fillText('BOX OFFICE / SALES ($M)',0,0);
   mCtx.restore();
 
-  // Group by year for gap lines
-  const byYr = {};
-  fd.forEach(d => {
-    if (!byYr[d.yr]) byYr[d.yr] = {};
-    byYr[d.yr][d.type + '_' + d.role] = d;
-  });
-
-  // Draw gap lines (dashed connector between critic and top grosser)
-  Object.keys(byYr).forEach(yr => {
-    ['movie', 'game'].forEach(t => {
-      const cr = byYr[yr][t + '_critic'];
-      const tp = byYr[yr][t + '_top'];
-      if (!cr || !tp || cr.title === tp.title) return;
-      const offset = t === 'movie' ? -4 : 4;
-      const xv = xF(+yr, W) + offset;
-      const y1 = yF(cr.gross, maxG, H) * prog + (H / 2) * (1 - prog);
-      const y2 = yF(tp.gross, maxG, H) * prog + (H / 2) * (1 - prog);
-      const grad = mCtx.createLinearGradient(0, Math.min(y1, y2), 0, Math.max(y1, y2));
-      grad.addColorStop(0, 'rgba(255,107,43,0.55)');
-      grad.addColorStop(1, 'rgba(255,255,255,0.1)');
-      mCtx.strokeStyle = grad;
-      mCtx.lineWidth = 1;
-      mCtx.setLineDash([2, 4]);
-      mCtx.beginPath(); mCtx.moveTo(xv, y1); mCtx.lineTo(xv, y2); mCtx.stroke();
+  // Gap lines
+  const byYr={};
+  fd.forEach(d=>{if(!byYr[d.yr])byYr[d.yr]={};byYr[d.yr][d.type+'_'+d.role]=d;});
+  Object.keys(byYr).forEach(yr=>{
+    ['movie','game'].forEach(t=>{
+      const cr=byYr[yr][t+'_critic'];
+      const tp=byYr[yr][t+'_top'];
+      if(!cr||!tp||cr.title===tp.title) return;
+      const xv=xF(+yr)+(t==='movie'?-4:4);
+      if(xv<PAD.l-10||xv>cssW-PAD.r+10) return;
+      const y1=yF(cr.gross,maxG)*prog+(cssH/2)*(1-prog);
+      const y2=yF(tp.gross,maxG)*prog+(cssH/2)*(1-prog);
+      const g=mCtx.createLinearGradient(0,Math.min(y1,y2),0,Math.max(y1,y2));
+      g.addColorStop(0,'rgba(255,107,43,0.5)');
+      g.addColorStop(1,'rgba(255,255,255,0.08)');
+      mCtx.strokeStyle=g;mCtx.lineWidth=1;
+      mCtx.setLineDash([2,4]);
+      mCtx.beginPath();mCtx.moveTo(xv,y1);mCtx.lineTo(xv,y2);mCtx.stroke();
       mCtx.setLineDash([]);
     });
   });
 
-  // Draw points
-  const pts = [];
-  fd.forEach(d => {
-    const offset = d.type === 'movie' ? -5 : 5;
-    const xv = xF(d.yr, W) + offset;
-    const yv = yF(d.gross, maxG, H) * prog + (H / 2) * (1 - prog);
-    const r = scoreToR(d.score) * Math.min(prog * 1.8, 1);
-    const isCritic = d.role === 'critic';
-    const isHov = hoveredPt && hoveredPt.d === d;
+  // Points
+  const pts=[];
+  fd.forEach(d=>{
+    const xv=xF(d.yr)+(d.type==='movie'?-5:5);
+    if(xv<PAD.l-20||xv>cssW-PAD.r+20) return;
+    const yv=yF(d.gross,maxG)*prog+(cssH/2)*(1-prog);
+    const r=Math.max(3, scoreR(d.score)*Math.min(prog*1.8,1));
+    const isCritic=d.role==='critic';
+    const isHov=hoveredPt&&hoveredPt.d===d;
 
     mCtx.save();
-    mCtx.globalAlpha = isHov ? 1 : (isCritic ? 0.92 : 0.6);
+    mCtx.globalAlpha=isHov?1:isCritic?0.9:0.55;
 
-    if (isCritic) {
-      // Outer glow
-      const grd = mCtx.createRadialGradient(xv, yv, 0, xv, yv, r * 2.2);
-      grd.addColorStop(0, 'rgba(255,107,43,0.3)');
-      grd.addColorStop(1, 'rgba(255,107,43,0)');
+    if(isCritic){
+      // Glow
+      const grd=mCtx.createRadialGradient(xv,yv,0,xv,yv,r*2.5);
+      grd.addColorStop(0,'rgba(255,107,43,0.28)');
+      grd.addColorStop(1,'rgba(255,107,43,0)');
       mCtx.beginPath();
-      if (d.type === 'movie') mCtx.arc(xv, yv, r * 2.2, 0, Math.PI * 2);
-      else { const s = r * 2.2; mCtx.moveTo(xv, yv - s); mCtx.lineTo(xv + s, yv); mCtx.lineTo(xv, yv + s); mCtx.lineTo(xv - s, yv); mCtx.closePath(); }
-      mCtx.fillStyle = grd;
-      mCtx.fill();
+      if(d.type==='movie') mCtx.arc(xv,yv,r*2.5,0,Math.PI*2);
+      else{const s=r*2.5;mCtx.moveTo(xv,yv-s);mCtx.lineTo(xv+s,yv);mCtx.lineTo(xv,yv+s);mCtx.lineTo(xv-s,yv);mCtx.closePath();}
+      mCtx.fillStyle=grd;mCtx.fill();
     }
 
-    if (d.type === 'movie') {
-      mCtx.beginPath();
-      mCtx.arc(xv, yv, r, 0, Math.PI * 2);
-      if (isCritic) {
-        mCtx.fillStyle = '#FF6B2B';
-        mCtx.fill();
-      } else {
-        mCtx.strokeStyle = 'rgba(255,255,255,0.45)';
-        mCtx.lineWidth = 1.2;
-        mCtx.stroke();
-        mCtx.fillStyle = 'rgba(255,255,255,0.06)';
-        mCtx.fill();
-      }
-      if (isHov) { mCtx.strokeStyle = '#fff'; mCtx.lineWidth = 1.5; mCtx.beginPath(); mCtx.arc(xv, yv, r + 2, 0, Math.PI * 2); mCtx.stroke(); }
+    if(d.type==='movie'){
+      mCtx.beginPath();mCtx.arc(xv,yv,r,0,Math.PI*2);
+      if(isCritic){mCtx.fillStyle='#FF6B2B';mCtx.fill();}
+      else{mCtx.strokeStyle='rgba(255,255,255,0.5)';mCtx.lineWidth=1.5;mCtx.stroke();mCtx.fillStyle='rgba(255,255,255,0.07)';mCtx.fill();}
+      if(isHov){mCtx.beginPath();mCtx.arc(xv,yv,r+3,0,Math.PI*2);mCtx.strokeStyle='#fff';mCtx.lineWidth=1.5;mCtx.stroke();}
     } else {
-      mCtx.beginPath();
-      mCtx.moveTo(xv, yv - r); mCtx.lineTo(xv + r, yv); mCtx.lineTo(xv, yv + r); mCtx.lineTo(xv - r, yv); mCtx.closePath();
-      if (isCritic) {
-        mCtx.fillStyle = '#FF6B2B';
-        mCtx.fill();
-      } else {
-        mCtx.strokeStyle = 'rgba(255,255,255,0.4)';
-        mCtx.lineWidth = 1.2;
-        mCtx.stroke();
-        mCtx.fillStyle = 'rgba(255,255,255,0.06)';
-        mCtx.fill();
-      }
-      if (isHov) {
-        mCtx.strokeStyle = '#fff'; mCtx.lineWidth = 1.5;
-        mCtx.beginPath(); mCtx.moveTo(xv, yv - r - 3); mCtx.lineTo(xv + r + 3, yv); mCtx.lineTo(xv, yv + r + 3); mCtx.lineTo(xv - r - 3, yv); mCtx.closePath(); mCtx.stroke();
-      }
+      mCtx.beginPath();mCtx.moveTo(xv,yv-r);mCtx.lineTo(xv+r,yv);mCtx.lineTo(xv,yv+r);mCtx.lineTo(xv-r,yv);mCtx.closePath();
+      if(isCritic){mCtx.fillStyle='#FF6B2B';mCtx.fill();}
+      else{mCtx.strokeStyle='rgba(255,255,255,0.48)';mCtx.lineWidth=1.5;mCtx.stroke();mCtx.fillStyle='rgba(255,255,255,0.07)';mCtx.fill();}
+      if(isHov){const s=r+3;mCtx.beginPath();mCtx.moveTo(xv,yv-s);mCtx.lineTo(xv+s,yv);mCtx.lineTo(xv,yv+s);mCtx.lineTo(xv-s,yv);mCtx.closePath();mCtx.strokeStyle='#fff';mCtx.lineWidth=1.5;mCtx.stroke();}
+    }
+
+    // Label at zoom>=2 when hovered
+    if(isHov&&zoomLevel>=2){
+      const label=d.title.length>22?d.title.slice(0,20)+'…':d.title;
+      mCtx.globalAlpha=1;
+      mCtx.font='600 11px Space Grotesk,sans-serif';
+      const tw=mCtx.measureText(label).width;
+      const lx=Math.min(Math.max(xv-tw/2,PAD.l),cssW-PAD.r-tw);
+      const ly=yv-r-18;
+      mCtx.fillStyle='rgba(8,8,9,0.88)';
+      mCtx.beginPath();mCtx.roundRect(lx-5,ly-12,tw+10,18,2);mCtx.fill();
+      mCtx.fillStyle='#fff';mCtx.textAlign='left';
+      mCtx.fillText(label,lx,ly);
     }
 
     mCtx.restore();
-    pts.push({ d, x: xv, y: yv, r });
+    pts.push({d,x:xv,y:yv,r:Math.max(r,7)});
   });
-
-  drawnPts = pts;
+  drawnPts=pts;
 }
 
-function animate() {
+function animate(){
   cancelAnimationFrame(animFrame);
-  animProg = 0;
-  const DUR = 1100;
-  const t0 = performance.now();
-  function step(now) {
-    const raw = (now - t0) / DUR;
-    animProg = Math.min(raw, 1);
-    const ease = 1 - Math.pow(1 - animProg, 4);
-    draw(ease);
-    if (animProg < 1) animFrame = requestAnimationFrame(step);
+  animProg=0;
+  const DUR=1000,t0=performance.now();
+  function step(now){
+    animProg=Math.min((now-t0)/DUR,1);
+    draw(1-Math.pow(1-animProg,4));
+    if(animProg<1) animFrame=requestAnimationFrame(step);
   }
-  animFrame = requestAnimationFrame(step);
+  animFrame=requestAnimationFrame(step);
 }
 
-// Tooltip
-const ttEl = document.getElementById('tooltip');
-mainCanvas.addEventListener('mousemove', e => {
-  const rect = mainCanvas.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  const cssX = e.clientX - rect.left;
-  const cssY = e.clientY - rect.top;
-  let found = null;
-  for (const p of drawnPts) {
-    const dx = cssX - p.x, dy = cssY - p.y;
-    if (Math.sqrt(dx * dx + dy * dy) < p.r + 8) { found = p; break; }
+// ─── Tooltip + hover ───
+const ttEl=document.getElementById('tooltip');
+mainCanvas.addEventListener('mousemove',e=>{
+  if(document.getElementById('panel-scatter').style.display==='none') return;
+  const rect=mainCanvas.getBoundingClientRect();
+  // Scale from rendered rect to CSS pixels
+  const scaleX=cssW/rect.width;
+  const scaleY=cssH/rect.height;
+  const mx=(e.clientX-rect.left)*scaleX;
+  const my=(e.clientY-rect.top)*scaleY;
+  let found=null;
+  // Larger hit target
+  for(const p of drawnPts){
+    const dx=mx-p.x, dy=my-p.y;
+    if(Math.sqrt(dx*dx+dy*dy)<p.r+14){found=p;break;}
   }
-  if (found) {
-    hoveredPt = found;
-    const d = found.d;
-    const gc = GENRE_COLORS[d.genre] || '#FF6B2B';
-    document.getElementById('tt-name').textContent = d.title;
-    const tag = document.getElementById('tt-tag');
-    tag.textContent = d.genre;
-    tag.style.background = gc + '22'; tag.style.color = gc; tag.style.border = '1px solid ' + gc + '55';
-    document.getElementById('tt-gross').textContent = '$' + d.gross.toLocaleString() + 'M';
-    document.getElementById('tt-score').textContent = d.score + ' / 100';
-    document.getElementById('tt-genre').textContent = d.genre;
-    document.getElementById('tt-role').textContent = (d.role === 'critic' ? (d.type === 'movie' ? '🏆 Oscar Winner' : '🎮 Game of the Year') : '💰 Top Grosser') + ' · ' + d.yr;
-    // Position
-    const tipW = 220;
-    let lx = e.clientX + 16;
-    if (lx + tipW > window.innerWidth - 10) lx = e.clientX - tipW - 12;
-    ttEl.style.left = lx + 'px';
-    ttEl.style.top = (e.clientY - 10) + 'px';
-    ttEl.style.opacity = '1';
+  const wasHov=hoveredPt;
+  hoveredPt=found||null;
+  if(found){
+    const d=found.d;
+    const gc=GCOL[d.genre]||'#FF6B2B';
+    document.getElementById('tt-name').textContent=d.title;
+    const tag=document.getElementById('tt-tag');
+    tag.textContent=d.genre;
+    tag.style.cssText=`background:${gc}22;color:${gc};border:1px solid ${gc}55`;
+    document.getElementById('tt-gross').textContent='$'+d.gross.toLocaleString()+'M';
+    document.getElementById('tt-score').textContent=d.score+' / 100';
+    document.getElementById('tt-genre').textContent=d.genre;
+    document.getElementById('tt-role').textContent=(d.role==='critic'?(d.type==='movie'?'🏆 Oscar Winner':'🎮 Game of the Year'):'💰 Top Grosser')+' · '+d.yr;
+    // Position tooltip
+    const tipW=220;
+    let lx=e.clientX+18;
+    if(lx+tipW>window.innerWidth-8) lx=e.clientX-tipW-14;
+    ttEl.style.cssText=`opacity:1;left:${lx}px;top:${e.clientY-8}px`;
+    // Show full tooltip always, but only show inline label at zoom>=2
+    if(zoomLevel<2){
+      // Tooltip still shows, just not the inline canvas label
+    }
   } else {
-    hoveredPt = null;
-    ttEl.style.opacity = '0';
+    ttEl.style.opacity='0';
   }
-  draw(1);
+  if(found!==wasHov) draw(1);
 });
-mainCanvas.addEventListener('mouseleave', () => {
-  hoveredPt = null;
-  ttEl.style.opacity = '0';
-  draw(1);
+mainCanvas.addEventListener('mouseleave',()=>{hoveredPt=null;ttEl.style.opacity='0';draw(1);});
+
+// ─── Zoom slider ───
+const zoomSlider=document.getElementById('zoomSlider');
+const zoomValEl=document.getElementById('zoomVal');
+const zoomNotice=document.getElementById('zoomNotice');
+
+function clampPan(){
+  const maxOffset=Math.max(0,1-1/zoomLevel);
+  panOffset=Math.max(0,Math.min(panOffset,maxOffset));
+}
+
+zoomSlider.addEventListener('input',()=>{
+  const prevZoom=zoomLevel;
+  zoomLevel=parseFloat(zoomSlider.value);
+  const prevVisibleFrac=1/prevZoom;
+  const newVisibleFrac=1/zoomLevel;
+  const centreFrac=panOffset+prevVisibleFrac/2;
+  panOffset=centreFrac-newVisibleFrac/2;
+  clampPan();
+  zoomValEl.textContent=zoomLevel.toFixed(1)+'x';
+  zoomNotice.style.opacity=zoomLevel>=2?'0':'1';
+  panHint.style.opacity=zoomLevel>1?'1':'0';
+  animate();
 });
 
-// Filters
-document.querySelectorAll('.btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.btn').forEach(x => x.classList.remove('on'));
+// Pan hint
+const panHint=document.createElement('div');
+panHint.style.cssText='font-family:var(--mono);font-size:10px;color:rgba(255,107,43,0.45);letter-spacing:.06em;padding:4px 0 8px;opacity:0;transition:opacity .3s';
+panHint.textContent='<- Drag or scroll horizontally to pan ->';
+mainCanvas.closest('.chart-box').after(panHint);
+
+// Drag to pan
+let isDragging=false,dragStartX=0,dragStartPan=0;
+mainCanvas.addEventListener('mousedown',e=>{
+  if(zoomLevel<=1) return;
+  isDragging=true; dragStartX=e.clientX; dragStartPan=panOffset;
+  mainCanvas.style.cursor='grabbing'; e.preventDefault();
+});
+window.addEventListener('mousemove',e=>{
+  if(!isDragging) return;
+  const totalSpan=MAX_YR-MIN_YR;
+  const visibleSpan=totalSpan/zoomLevel;
+  const plotW=cssW-PAD.l-PAD.r;
+  const pxPerYear=plotW/visibleSpan;
+  const deltaYr=(e.clientX-dragStartX)/pxPerYear;
+  panOffset=dragStartPan-deltaYr/totalSpan;
+  clampPan(); draw(1);
+});
+window.addEventListener('mouseup',()=>{
+  if(isDragging){isDragging=false;mainCanvas.style.cursor='crosshair';}
+});
+
+// Wheel / trackpad scroll to pan
+mainCanvas.addEventListener('wheel',e=>{
+  if(zoomLevel<=1) return;
+  e.preventDefault();
+  const totalSpan=MAX_YR-MIN_YR;
+  const plotW=cssW-PAD.l-PAD.r;
+  const visibleSpan=totalSpan/zoomLevel;
+  const pxPerYear=plotW/visibleSpan;
+  const delta=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+  panOffset+=delta/(pxPerYear*totalSpan)*18;
+  clampPan(); draw(1);
+},{passive:false});
+
+// Touch pan
+let touchStartX=0,touchStartPan=0;
+mainCanvas.addEventListener('touchstart',e=>{if(zoomLevel<=1)return;touchStartX=e.touches[0].clientX;touchStartPan=panOffset;},{passive:true});
+mainCanvas.addEventListener('touchmove',e=>{
+  if(zoomLevel<=1)return;
+  e.preventDefault();
+  const totalSpan=MAX_YR-MIN_YR;
+  const plotW=cssW-PAD.l-PAD.r;
+  const visibleSpan=totalSpan/zoomLevel;
+  const pxPerYear=plotW/visibleSpan;
+  const deltaYr=(e.touches[0].clientX-touchStartX)/pxPerYear;
+  panOffset=touchStartPan-deltaYr/totalSpan;
+  clampPan(); draw(1);
+},{passive:false});
+
+// ─── Filter buttons ───
+document.querySelectorAll('#btns .btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('#btns .btn').forEach(x=>x.classList.remove('on'));
     b.classList.add('on');
-    activeFilter = b.dataset.f;
+    activeFilter=b.dataset.f;
     buildMetrics();
     buildGap();
     animate();
   });
 });
 
-// Metrics
-function buildMetrics() {
-  const fd = getFiltered();
-  const critics = fd.filter(d => d.role === 'critic');
-  const tops = fd.filter(d => d.role === 'top');
-  const avgCrit = Math.round(critics.reduce((a, d) => a + d.gross, 0) / critics.length);
-  const avgTop = Math.round(tops.reduce((a, d) => a + d.gross, 0) / tops.length);
-  const avgScore = Math.round(critics.reduce((a, d) => a + d.score, 0) / critics.length);
-  const yrs = [...new Set(fd.map(d => d.yr))];
-  let bigGap = 0, bigYr = '—';
-  yrs.forEach(yr => {
-    const mc = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'critic');
-    const mt = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'top');
-    if (mc && mt && mc.title !== mt.title) {
-      const g = mt.gross - mc.gross;
-      if (g > bigGap) { bigGap = g; bigYr = yr; }
+// ─── Gap chart ───
+let gapChart=null;
+function buildGap(){
+  const fd=getFiltered();
+  const yrs=[...new Set(fd.map(d=>d.yr))].sort();
+  const labels=[],mG=[],gG=[];
+  yrs.forEach(yr=>{
+    const mc=fd.find(d=>d.yr===yr&&d.type==='movie'&&d.role==='critic');
+    const mt=fd.find(d=>d.yr===yr&&d.type==='movie'&&d.role==='top');
+    const gc2=fd.find(d=>d.yr===yr&&d.type==='game'&&d.role==='critic');
+    const gt=fd.find(d=>d.yr===yr&&d.type==='game'&&d.role==='top');
+    const hm=mc&&mt&&mc.title!==mt.title;
+    const hg=gc2&&gt&&gc2.title!==gt.title;
+    if(hm||hg){
+      labels.push("'"+String(yr).slice(2));
+      mG.push(hm?Math.round(mt.gross-mc.gross):null);
+      gG.push(hg?Math.round(gt.gross-gc2.gross):null);
     }
   });
-  document.getElementById('metrics').innerHTML = `
-    <div class="metric"><div class="m-label">Avg Critic Pick</div><div class="m-val">$${(avgCrit / 1000).toFixed(1)}B</div><div class="m-sub">earnings</div></div>
-    <div class="metric"><div class="m-label">Avg Top Grosser</div><div class="m-val">$${(avgTop / 1000).toFixed(1)}B</div><div class="m-sub">earnings</div></div>
+  const gc=document.getElementById('gapCanvas');
+  const bW=Math.max(labels.length*44+80,480);
+  gc.style.width=bW+'px';gc.style.height='130px';
+  const dpr=window.devicePixelRatio||1;
+  gc.width=bW*dpr;gc.height=130*dpr;
+  if(gapChart) gapChart.destroy();
+  const gCtx=gc.getContext('2d');
+  gCtx.setTransform(dpr,0,0,dpr,0,0);
+  gapChart=new Chart(gc,{type:'bar',data:{labels,datasets:[
+    {label:'Movie gap',data:mG,backgroundColor:'rgba(255,107,43,0.72)',borderRadius:2,borderSkipped:false},
+    {label:'Game gap',data:gG,backgroundColor:'rgba(255,255,255,0.22)',borderRadius:2,borderSkipped:false}
+  ]},options:{responsive:false,animation:{duration:700,easing:'easeOutQuart'},plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(8,8,9,0.96)',borderColor:'rgba(255,107,43,0.4)',borderWidth:1,titleColor:'#fff',bodyColor:'rgba(255,255,255,0.55)',titleFont:{family:'Space Mono,monospace',size:11},bodyFont:{family:'Space Mono,monospace',size:10},callbacks:{label:c=>'$'+Math.round(c.raw).toLocaleString()+'M gap'}}},scales:{x:{ticks:{color:'rgba(255,255,255,0.28)',font:{family:'Space Mono,monospace',size:9}},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{color:'rgba(255,255,255,0.22)',font:{family:'Space Mono,monospace',size:9},callback:v=>'$'+v+'M'},grid:{color:'rgba(255,255,255,0.04)'}}}}});
+}
+
+// ─── Metrics ───
+function buildMetrics(){
+  const fd=getFiltered();
+  const critics=fd.filter(d=>d.role==='critic');
+  const tops=fd.filter(d=>d.role==='top');
+  const avgCrit=Math.round(critics.reduce((a,d)=>a+d.gross,0)/critics.length);
+  const avgTop=Math.round(tops.reduce((a,d)=>a+d.gross,0)/tops.length);
+  const avgScore=Math.round(critics.reduce((a,d)=>a+d.score,0)/critics.length);
+  const yrs=[...new Set(fd.map(d=>d.yr))];
+  let bigGap=0,bigYr='—';
+  yrs.forEach(yr=>{
+    const mc=fd.find(d=>d.yr===yr&&d.type==='movie'&&d.role==='critic');
+    const mt=fd.find(d=>d.yr===yr&&d.type==='movie'&&d.role==='top');
+    if(mc&&mt&&mc.title!==mt.title){const g=mt.gross-mc.gross;if(g>bigGap){bigGap=g;bigYr=yr;}}
+  });
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="m-label">Avg Critic Pick</div><div class="m-val">$${(avgCrit/1000).toFixed(1)}B</div><div class="m-sub">earnings</div></div>
+    <div class="metric"><div class="m-label">Avg Top Grosser</div><div class="m-val">$${(avgTop/1000).toFixed(1)}B</div><div class="m-sub">earnings per year</div></div>
     <div class="metric"><div class="m-label">Avg Critic Score</div><div class="m-val">${avgScore}</div><div class="m-sub">out of 100</div></div>
-    <div class="metric"><div class="m-label">Peak Gap Year</div><div class="m-val">${bigYr}</div><div class="m-sub">$${Math.round(bigGap / 100) / 10}B diff</div></div>
+    <div class="metric"><div class="m-label">Peak Gap Year</div><div class="m-val">${bigYr}</div><div class="m-sub">$${Math.round(bigGap/100)/10}B diff</div></div>
   `;
 }
 
-// Gap chart
-let gapChart = null;
-function buildGap() {
-  const fd = getFiltered();
-  const yrs = [...new Set(fd.map(d => d.yr))].sort();
-  const labels = [], mGaps = [], gGaps = [];
-  yrs.forEach(yr => {
-    const mc = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'critic');
-    const mt = fd.find(d => d.yr === yr && d.type === 'movie' && d.role === 'top');
-    const gc2 = fd.find(d => d.yr === yr && d.type === 'game' && d.role === 'critic');
-    const gt = fd.find(d => d.yr === yr && d.type === 'game' && d.role === 'top');
-    const hasMov = mc && mt && mc.title !== mt.title;
-    const hasGam = gc2 && gt && gc2.title !== gt.title;
-    if (hasMov || hasGam) {
-      labels.push("'" + String(yr).slice(2));
-      mGaps.push(hasMov ? Math.round(mt.gross - mc.gross) : null);
-      gGaps.push(hasGam ? Math.round(gt.gross - gc2.gross) : null);
-    }
+// ─── Insights ───
+function buildInsights(){
+  // Best movie year — total gross of ALL movie entries that year
+  const movieYrTotals={};
+  DATA.filter(d=>d.type==='movie').forEach(d=>{
+    movieYrTotals[d.yr]=(movieYrTotals[d.yr]||0)+d.gross;
   });
+  const bestMovieYr=Object.keys(movieYrTotals).reduce((a,b)=>movieYrTotals[a]>movieYrTotals[b]?a:b);
+  const bestMovieTotal=movieYrTotals[bestMovieYr];
+  const bestMovieTopTitle=DATA.find(d=>d.yr===+bestMovieYr&&d.type==='movie'&&d.role==='top')?.title||'';
 
-  const gapC = document.getElementById('gapCanvas');
-  const bW = Math.max(labels.length * 42 + 80, 500);
-  gapC.style.width = bW + 'px'; gapC.style.height = '140px';
-  gapC.width = bW * (window.devicePixelRatio || 1);
-  gapC.height = 140 * (window.devicePixelRatio || 1);
+  // Best game year
+  const gameYrTotals={};
+  DATA.filter(d=>d.type==='game').forEach(d=>{
+    gameYrTotals[d.yr]=(gameYrTotals[d.yr]||0)+d.gross;
+  });
+  const bestGameYr=Object.keys(gameYrTotals).reduce((a,b)=>gameYrTotals[a]>gameYrTotals[b]?a:b);
+  const bestGameTotal=gameYrTotals[bestGameYr];
+  const bestGameTopTitle=DATA.find(d=>d.yr===+bestGameYr&&d.type==='game'&&d.role==='top')?.title||'';
 
-  if (gapChart) gapChart.destroy();
-  gapChart = new Chart(gapC, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Movie gap', data: mGaps,
-          backgroundColor: 'rgba(255,107,43,0.72)',
-          borderRadius: 2, borderSkipped: false
-        },
-        {
-          label: 'Game gap', data: gGaps,
-          backgroundColor: 'rgba(255,255,255,0.22)',
-          borderRadius: 2, borderSkipped: false
-        }
-      ]
-    },
-    options: {
-      responsive: false,
-      animation: { duration: 750, easing: 'easeOutQuart' },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(10,10,11,0.96)',
-          borderColor: 'rgba(255,107,43,0.4)', borderWidth: 1,
-          titleColor: '#fff', bodyColor: 'rgba(255,255,255,0.55)',
-          titleFont: { family: 'Space Mono, monospace', size: 11 },
-          bodyFont: { family: 'Space Mono, monospace', size: 10 },
-          callbacks: {
-            label: c => '$' + Math.round(c.raw).toLocaleString() + 'M gap'
+  document.getElementById('insights').innerHTML=`
+    <div class="insight">
+      <div class="ins-yr">2009</div>
+      <div class="ins-txt">Biggest critic-crowd divergence ever. <strong>The Hurt Locker ($49M)</strong> won Best Picture against <strong>Avatar ($2.9B)</strong> — a $2.87B gap.</div>
+    </div>
+    <div class="insight">
+      <div class="ins-yr">${bestMovieYr} 🎬</div>
+      <div class="ins-txt">Best year for movies in earnings. <strong>$${Math.round(bestMovieTotal).toLocaleString()}M total</strong> tracked, led by <strong>${bestMovieTopTitle}</strong>.</div>
+    </div>
+    <div class="insight">
+      <div class="ins-yr">${bestGameYr} 🎮</div>
+      <div class="ins-txt">Best year for games in earnings. <strong>$${Math.round(bestGameTotal).toLocaleString()}M total</strong> tracked, led by <strong>${bestGameTopTitle}</strong>.</div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// STREAM VIEW (stacked area by genre)
+// ═══════════════════════════════════════════
+let movieStreamChart=null, gameStreamChart=null;
+function buildStreamCharts(){
+  const yrs=Array.from({length:31},(_,i)=>1994+i);
+
+  function makeStream(type,canvasId,legendId){
+    const genres=[...new Set(DATA.filter(d=>d.type===type).map(d=>d.genre))].sort();
+    const datasets=genres.map(g=>({
+      label:g,
+      data:yrs.map(yr=>{
+        const pts=DATA.filter(d=>d.type===type&&d.yr===yr&&d.genre===g);
+        return pts.reduce((a,d)=>a+d.gross,0)||null;
+      }),
+      backgroundColor:(GCOL[g]||'#888')+'bb',
+      borderColor:(GCOL[g]||'#888'),
+      borderWidth:1,
+      fill:true,
+      tension:0.45,
+      pointRadius:0,
+      pointHoverRadius:5,
+    }));
+
+    // Legend
+    const legEl=document.getElementById(legendId);
+    legEl.innerHTML=genres.map(g=>`<div class="wli"><div class="wdot" style="background:${GCOL[g]||'#888'}"></div><span>${g}</span></div>`).join('');
+
+    const c=document.getElementById(canvasId);
+    const dpr=window.devicePixelRatio||1;
+    const cw=c.parentElement.clientWidth-4;
+    c.style.width=cw+'px';c.style.height='240px';
+    c.width=cw*dpr;c.height=240*dpr;
+    const sCtx=c.getContext('2d');
+    sCtx.setTransform(dpr,0,0,dpr,0,0);
+
+    return new Chart(c,{
+      type:'line',
+      data:{labels:yrs.map(y=>"'"+String(y).slice(2)),datasets},
+      options:{
+        responsive:false,
+        animation:{duration:900,easing:'easeOutQuart'},
+        interaction:{mode:'index',intersect:false},
+        plugins:{
+          legend:{display:false},
+          tooltip:{
+            backgroundColor:'rgba(8,8,9,0.96)',
+            borderColor:'rgba(255,107,43,0.4)',borderWidth:1,
+            titleColor:'#fff',bodyColor:'rgba(255,255,255,0.6)',
+            titleFont:{family:'Space Mono,monospace',size:10},
+            bodyFont:{family:'Space Mono,monospace',size:10},
+            callbacks:{label:c=>c.parsed.y?`${c.dataset.label}: $${Math.round(c.parsed.y)}M`:null}
           }
-        }
-      },
-      scales: {
-        x: {
-          ticks: { color: 'rgba(255,255,255,0.28)', font: { family: 'Space Mono, monospace', size: 9 } },
-          grid: { color: 'rgba(255,255,255,0.04)' }
         },
-        y: {
-          ticks: { color: 'rgba(255,255,255,0.22)', font: { family: 'Space Mono, monospace', size: 9 }, callback: v => '$' + v + 'M' },
-          grid: { color: 'rgba(255,255,255,0.04)' }
+        scales:{
+          x:{stacked:true,ticks:{color:'rgba(255,255,255,0.25)',font:{family:'Space Mono,monospace',size:9},maxRotation:0,autoSkip:true,maxTicksLimit:16},grid:{color:'rgba(255,255,255,0.04)'}},
+          y:{stacked:true,ticks:{color:'rgba(255,255,255,0.22)',font:{family:'Space Mono,monospace',size:9},callback:v=>'$'+v+'M'},grid:{color:'rgba(255,255,255,0.04)'}}
         }
       }
-    }
-  });
+    });
+  }
+
+  if(movieStreamChart) movieStreamChart.destroy();
+  if(gameStreamChart) gameStreamChart.destroy();
+  movieStreamChart=makeStream('movie','movieStreamCanvas','movieStreamLegend');
+  gameStreamChart=makeStream('game','gameStreamCanvas','gameStreamLegend');
 }
 
-// Init
-function init() {
-  setCanvasSize();
-  buildMetrics();
-  buildGap();
-  animate();
+// ═══════════════════════════════════════════
+// GENRE DONUT CHARTS
+// ═══════════════════════════════════════════
+let donutCharts={};
+function buildDonutCharts(){
+  function makeDonut(canvasId,type,role){
+    const subset=DATA.filter(d=>d.type===type&&d.role===role);
+    const genreTotals={};
+    subset.forEach(d=>{genreTotals[d.genre]=(genreTotals[d.genre]||0)+1;});
+    const sorted=Object.entries(genreTotals).sort((a,b)=>b[1]-a[1]);
+    const labels=sorted.map(e=>e[0]);
+    const vals=sorted.map(e=>e[1]);
+    const colors=labels.map(l=>GCOL[l]||'#888');
+
+    const c=document.getElementById(canvasId);
+    const dpr=window.devicePixelRatio||1;
+    c.style.width='100%';c.style.height='220px';
+    const cw=c.parentElement.clientWidth-28;
+    c.width=cw*dpr;c.height=220*dpr;
+    const dCtx=c.getContext('2d');
+    dCtx.setTransform(dpr,0,0,dpr,0,0);
+
+    if(donutCharts[canvasId]) donutCharts[canvasId].destroy();
+    donutCharts[canvasId]=new Chart(c,{
+      type:'doughnut',
+      data:{labels,datasets:[{data:vals,backgroundColor:colors.map(c=>c+'cc'),borderColor:colors,borderWidth:1.5,hoverBorderWidth:2.5,hoverOffset:8}]},
+      options:{
+        responsive:false,
+        cutout:'58%',
+        animation:{animateRotate:true,duration:900,easing:'easeOutQuart'},
+        plugins:{
+          legend:{position:'right',labels:{color:'rgba(232,230,225,0.6)',font:{family:'Space Mono,monospace',size:9},boxWidth:10,padding:8}},
+          tooltip:{backgroundColor:'rgba(8,8,9,0.96)',borderColor:'rgba(255,107,43,0.4)',borderWidth:1,titleColor:'#fff',bodyColor:'rgba(255,255,255,0.6)',titleFont:{family:'Space Mono,monospace',size:11},bodyFont:{family:'Space Mono,monospace',size:10},callbacks:{label:c=>`${c.label}: ${c.parsed} year${c.parsed>1?'s':''}`}}
+        }
+      }
+    });
+  }
+  makeDonut('movieCriticDonut','movie','critic');
+  makeDonut('movieTopDonut','movie','top');
+  makeDonut('gameCriticDonut','game','critic');
+  makeDonut('gameTopDonut','game','top');
 }
-window.addEventListener('resize', () => { setCanvasSize(); draw(1); buildGap(); });
-init();
+
+// ═══════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════
+let streamBuilt=false, donutBuilt=false;
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(x=>{x.classList.remove('active');x.style.display='none';});
+    t.classList.add('on');
+    const panel=document.getElementById('panel-'+t.dataset.tab);
+    panel.style.display='block';
+    panel.classList.add('active');
+    if(t.dataset.tab==='stream'&&!streamBuilt){buildStreamCharts();streamBuilt=true;}
+    if(t.dataset.tab==='genre'&&!donutBuilt){buildDonutCharts();donutBuilt=true;}
+    if(t.dataset.tab==='scatter'){setSize();animate();}
+  });
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+// Make sure only scatter panel is visible initially
+document.querySelectorAll('.panel').forEach(p=>p.style.display='none');
+document.getElementById('panel-scatter').style.display='block';
+
+window.addEventListener('resize',()=>{
+  if(document.getElementById('panel-scatter').style.display!=='none'){setSize();animate();}
+});
+
+setSize();
+buildMetrics();
+buildInsights();
+buildGap();
+animate();
 </script>
 </body>
 </html>
